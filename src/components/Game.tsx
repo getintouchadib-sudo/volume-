@@ -60,12 +60,12 @@ export const Game: React.FC = () => {
   // GAME A: MATCH THE MEASUREMENT STATE & LOGIC
   // --------------------------------------------------------------------------
   const initialMatchPairs: { id: string; valA: string; valB: string; labelA: string; labelB: string }[] = [
-    { id: 'm1', valA: '0.5 L', valB: '500 mL', labelA: '0.5 Litres', labelB: '500 Millilitres' },
-    { id: 'm2', valA: '0.25 L', valB: '250 mL', labelA: '0.25 Litres', labelB: '250 Millilitres' },
-    { id: 'm3', valA: '3/4 L', valB: '750 mL', labelA: '3/4 Litres', labelB: '750 Millilitres' },
-    { id: 'm4', valA: '1.25 L', valB: '1,250 mL', labelA: '1.25 Litres', labelB: '1,250 Millilitres' },
-    { id: 'm5', valA: '1/2 L', valB: '500 mL', labelA: '1/2 Litre', labelB: '500 Millilitres' },
-    { id: 'm6', valA: '2.75 L', valB: '2,750 mL', labelA: '2.75 Litres', labelB: '2,750 Millilitres' },
+    { id: 'm1', valA: '4 L', valB: '4,000 mL', labelA: '4 Litres', labelB: '4,000 Millilitres' },
+    { id: 'm2', valA: '9 L', valB: '9,000 mL', labelA: '9 Litres', labelB: '9,000 Millilitres' },
+    { id: 'm3', valA: '15 L', valB: '15,000 mL', labelA: '15 Litres', labelB: '15,000 Millilitres' },
+    { id: 'm4', valA: '2.5 L', valB: '2,500 mL', labelA: '2.5 Litres', labelB: '2,500 Millilitres' },
+    { id: 'm5', valA: '11 L', valB: '11,000 mL', labelA: '11 Litres', labelB: '11,000 Millilitres' },
+    { id: 'm6', valA: '14 L', valB: '14,000 mL', labelA: '14 Litres', labelB: '14,000 Millilitres' },
   ];
 
   const generateShuffledCards = (): MatchCard[] => {
@@ -118,43 +118,51 @@ export const Game: React.FC = () => {
   const fillQuestions: FillQuestion[] = [
     {
       id: 'fb1',
-      questionText: '0.3 L = _____ mL',
+      questionText: '6 L = _____ mL',
       blankUnit: 'mL',
-      options: ['30 mL', '300 mL', '3,000 mL', '0.003 mL'],
-      correctAnswer: '300 mL',
-      explanation: 'Multiply litres by 1,000: 0.3 × 1,000 = 300 mL.'
+      options: ['600 mL', '6,000 mL', '60,000 mL', '60 mL'],
+      correctAnswer: '6,000 mL',
+      explanation: 'Multiply litres by 1,000: 6 × 1,000 = 6,000 mL.'
     },
     {
       id: 'fb2',
-      questionText: '700 mL = _____ L',
+      questionText: '12,000 mL = _____ L',
       blankUnit: 'L',
-      options: ['0.07 L', '0.7 L', '7.0 L', '70 L'],
-      correctAnswer: '0.7 L',
-      explanation: 'Divide millilitres by 1,000: 700 ÷ 1,000 = 0.7 L.'
+      options: ['1.2 L', '12 L', '120 L', '0.12 L'],
+      correctAnswer: '12 L',
+      explanation: 'Divide millilitres by 1,000: 12,000 ÷ 1,000 = 12 L.'
     },
     {
       id: 'fb3',
-      questionText: '1/2 L = _____ mL',
-      blankUnit: 'mL',
-      options: ['250 mL', '500 mL', '750 mL', '100 mL'],
-      correctAnswer: '500 mL',
-      explanation: '1/2 of 1,000 mL = 1,000 ÷ 2 = 500 mL.'
+      questionText: '_____ L = 8,000 mL',
+      blankUnit: 'L',
+      options: ['8 L', '80 L', '0.8 L', '800 L'],
+      correctAnswer: '8 L',
+      explanation: 'Divide millilitres by 1,000: 8,000 ÷ 1,000 = 8 L.'
     },
     {
       id: 'fb4',
-      questionText: '2,750 mL = _____ L',
-      blankUnit: 'L',
-      options: ['2.75 L', '27.5 L', '0.275 L', '275 L'],
-      correctAnswer: '2.75 L',
-      explanation: '2,750 ÷ 1,000 = 2.75 L (2 L + 750 mL = 2.75 L).'
+      questionText: '15 L = _____ mL',
+      blankUnit: 'mL',
+      options: ['1,500 mL', '15,000 mL', '150,000 mL', '150 mL'],
+      correctAnswer: '15,000 mL',
+      explanation: 'Multiply litres by 1,000: 15 × 1,000 = 15,000 mL.'
     },
     {
       id: 'fb5',
-      questionText: '3/4 L = _____ mL',
+      questionText: '10.5 L = _____ mL',
       blankUnit: 'mL',
-      options: ['500 mL', '600 mL', '750 mL', '800 mL'],
-      correctAnswer: '750 mL',
-      explanation: '3/4 × 1,000 mL = 3,000 ÷ 4 = 750 mL.'
+      options: ['1,050 mL', '10,500 mL', '105,000 mL', '105 mL'],
+      correctAnswer: '10,500 mL',
+      explanation: 'Multiply litres by 1,000: 10.5 × 1,000 = 10,500 mL.'
+    },
+    {
+      id: 'fb6',
+      questionText: '13 L = _____ mL',
+      blankUnit: 'mL',
+      options: ['1,300 mL', '13,000 mL', '130,000 mL', '130 mL'],
+      correctAnswer: '13,000 mL',
+      explanation: 'Multiply litres by 1,000: 13 × 1,000 = 13,000 mL.'
     }
   ];
 
@@ -192,38 +200,45 @@ export const Game: React.FC = () => {
   const misconceptionItems: MisconceptionItem[] = [
     {
       id: 'mc1',
-      statement: '0.5 L = 50 mL',
+      statement: '5 L = 500 mL',
       isCorrect: false,
-      correctionText: '0.5 L = 500 mL',
-      explanation: 'MISCONCEPTION! Pupils often forget a zero. Since 1 L = 1,000 mL, 0.5 × 1,000 = 500 mL, NOT 50 mL!'
+      correctionText: '5 L = 5,000 mL',
+      explanation: 'MISCONCEPTION! Converting litres to millilitres requires multiplying by 1,000. 5 × 1,000 = 5,000 mL, NOT 500 mL!'
     },
     {
       id: 'mc2',
-      statement: '750 mL = 0.75 L',
+      statement: '11 L = 11,000 mL',
       isCorrect: true,
-      correctionText: '750 mL = 0.75 L (Correct!)',
-      explanation: 'CORRECT! Dividing 750 by 1,000 gives 0.75 L, which is also equal to 3/4 L.'
+      correctionText: '11 L = 11,000 mL (Correct!)',
+      explanation: 'CORRECT! Multiplying 11 litres by 1,000 gives 11,000 mL.'
     },
     {
       id: 'mc3',
-      statement: '1/4 L = 250 mL',
+      statement: '15,000 mL = 15 L',
       isCorrect: true,
-      correctionText: '1/4 L = 250 mL (Correct!)',
-      explanation: 'CORRECT! 1,000 mL ÷ 4 = 250 mL.'
+      correctionText: '15,000 mL = 15 L (Correct!)',
+      explanation: 'CORRECT! Converting millilitres to litres requires dividing by 1,000. 15,000 ÷ 1,000 = 15 L.'
     },
     {
       id: 'mc4',
-      statement: '1.2 L = 120 mL',
+      statement: '14 L = 1,400 mL',
       isCorrect: false,
-      correctionText: '1.2 L = 1,200 mL',
-      explanation: 'MISCONCEPTION! 1.2 × 1,000 = 1,200 mL. Remember 1 L alone is already 1,000 mL!'
+      correctionText: '14 L = 14,000 mL',
+      explanation: 'MISCONCEPTION! 14 × 1,000 = 14,000 mL. Do not forget that 1 L = 1,000 mL!'
     },
     {
       id: 'mc5',
-      statement: '3,050 mL = 3.5 L',
+      statement: '8.5 L = 8,500 mL',
+      isCorrect: true,
+      correctionText: '8.5 L = 8,500 mL (Correct!)',
+      explanation: 'CORRECT! 8.5 × 1,000 = 8,500 mL.'
+    },
+    {
+      id: 'mc6',
+      statement: '13 L = 130 mL',
       isCorrect: false,
-      correctionText: '3,050 mL = 3.05 L',
-      explanation: 'MISCONCEPTION! 3,050 ÷ 1,000 = 3.05 L. Do not confuse 50 mL with 500 mL!'
+      correctionText: '13 L = 13,000 mL',
+      explanation: 'MISCONCEPTION! 13 × 1,000 = 13,000 mL, NOT 130 mL.'
     }
   ];
 
