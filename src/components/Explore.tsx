@@ -27,7 +27,7 @@ export const Explore: React.FC = () => {
   const [isPouring, setIsPouring] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const JUG_CAPACITY = 1000; // 1.0 L capacity
+  const JUG_CAPACITY = 15000; // 15 L (15,000 mL) capacity
 
   // Calculate pending volume across all current container selections
   const pendingVolume = containers.reduce((sum, c) => {
@@ -38,7 +38,7 @@ export const Explore: React.FC = () => {
   // Total selected items count
   const totalSelectedUnits = Object.values(selectedCounts).reduce((sum, count) => sum + count, 0);
 
-  // Handle clicking a container to increase selection count (or block if exceeding 1,000 mL)
+  // Handle clicking a container to increase selection count (or block if exceeding 15,000 mL)
   const handleSelectContainer = (id: number) => {
     if (isPouring) return;
 
@@ -47,7 +47,7 @@ export const Explore: React.FC = () => {
 
     // Check if adding this container capacity exceeds jug's remaining capacity
     if (jugVolume + pendingVolume + container.capacity > JUG_CAPACITY) {
-      setToastMessage('The jug can hold a maximum of 1,000 mL!');
+      setToastMessage('The jug can hold a maximum of 15,000 mL (15 L)!');
       setTimeout(() => setToastMessage(null), 3000);
       return;
     }
@@ -161,7 +161,7 @@ export const Explore: React.FC = () => {
         <div className="lg:col-span-5 bg-white rounded-3xl p-6 md:p-8 border-2 border-slate-100 shadow-lg space-y-6 flex flex-col items-center justify-between">
           <div className="text-center space-y-1">
             <span className="text-xs font-black uppercase tracking-widest text-cyan-600">
-              1.0 Litre Capacity Jug
+              15.0 Litre Capacity Jug
             </span>
             <h3 className="text-2xl font-black text-slate-900">
               Measuring Jug
@@ -193,9 +193,9 @@ export const Explore: React.FC = () => {
               <g clipPath="url(#jugClipMain)">
                 <rect
                   x="40"
-                  y={230 - (jugVolume / 1000) * 200}
+                  y={230 - (jugVolume / JUG_CAPACITY) * 200}
                   width="120"
-                  height={(jugVolume / 1000) * 200}
+                  height={(jugVolume / JUG_CAPACITY) * 200}
                   fill="#38bdf8"
                   opacity="0.85"
                   className="transition-all duration-500 ease-out"
@@ -204,9 +204,9 @@ export const Explore: React.FC = () => {
                 {jugVolume > 0 && (
                   <line
                     x1="40"
-                    y1={230 - (jugVolume / 1000) * 200}
+                    y1={230 - (jugVolume / JUG_CAPACITY) * 200}
                     x2="160"
-                    y2={230 - (jugVolume / 1000) * 200}
+                    y2={230 - (jugVolume / JUG_CAPACITY) * 200}
                     stroke="#0284c7"
                     strokeWidth="3"
                   />
@@ -218,12 +218,12 @@ export const Explore: React.FC = () => {
                 <path d="M 42,22 L 158,22 L 148,228 C 148,238 138,243 128,243 L 72,243 C 62,243 52,238 52,228 Z" />
               </clipPath>
 
-              {/* Scale Ticks & Labels (0 L to 1.0 L) */}
-              {Array.from({ length: 11 }).map((_, i) => {
-                const mLVal = i * 100;
-                const lVal = (mLVal / 1000).toFixed(1);
-                const yPos = 230 - (i / 10) * 200;
-                const isMajor = i % 2 === 0;
+              {/* Scale Ticks & Labels (0 L to 15.0 L) */}
+              {Array.from({ length: 16 }).map((_, i) => {
+                const mLVal = i * 1000;
+                const lVal = i;
+                const yPos = 230 - (i / 15) * 200;
+                const isMajor = i % 3 === 0;
 
                 return (
                   <g key={i}>
@@ -239,7 +239,7 @@ export const Explore: React.FC = () => {
                       <text
                         x="76"
                         y={yPos + 4}
-                        fontSize="9"
+                        fontSize="8.5"
                         fontWeight="bold"
                         fill="#0369a1"
                       >
@@ -262,7 +262,7 @@ export const Explore: React.FC = () => {
               Current Liquid Volume
             </span>
             <p className="text-2xl font-black text-slate-900">
-              {jugVolume} mL / 1,000 mL ({formattedL})
+              {jugVolume} mL / 15,000 mL ({formattedL})
             </p>
           </div>
         </div>
@@ -356,7 +356,7 @@ export const Explore: React.FC = () => {
                 {isPouring
                   ? 'Pouring Water into Jug...'
                   : jugVolume >= JUG_CAPACITY
-                  ? 'Jug is Full (1,000 mL Max Capacity)'
+                  ? 'Jug is Full (15,000 mL Max Capacity)'
                   : pendingVolume === 0
                   ? 'Select Containers Above to Pour'
                   : `Fill & Pour Selected Containers (${pendingVolume} mL) into Jug`}
