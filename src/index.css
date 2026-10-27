@@ -58,3 +58,38 @@
 .glass-reflection {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.3) 100%);
 }
+
+/* Print Stylesheet for Certificate Only */
+@media print {
+  /* Hide everything by default */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* Make only printable certificate and its children visible */
+  #printable-certificate,
+  #printable-certificate * {
+    visibility: visible !important;
+  }
+
+  /* Position certificate at the top of the printed page */
+  #printable-certificate {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 2.5rem !important;
+    box-shadow: none !important;
+    border-width: 6px !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Optimize page layout for single-page printing */
+  @page {
+    size: auto;
+    margin: 10mm;
+  }
+}

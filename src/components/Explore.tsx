@@ -6,65 +6,62 @@ import {
   Info,
   Calculator,
   Droplets,
-  ArrowRight
+  CheckCircle2
 } from 'lucide-react';
 
 interface ContainerData {
   id: number; // 1 to 10
   capacity: number; // 10 mL to 100 mL
-  isFull: boolean;
 }
 
 export const Explore: React.FC = () => {
   // 10 containers with capacities 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 mL
-  // Initial state: all containers empty (isFull: false)
-  const initialContainers: ContainerData[] = Array.from({ length: 10 }, (_, i) => ({
+  const containers: ContainerData[] = Array.from({ length: 10 }, (_, i) => ({
     id: i + 1,
-    capacity: (i + 1) * 10,
-    isFull: false
+    capacity: (i + 1) * 10
   }));
 
-  const [containers, setContainers] = useState<ContainerData[]>(initialContainers);
   const [jugVolume, setJugVolume] = useState<number>(0); // total mL in jug
   const [pouredHistory, setPouredHistory] = useState<number[]>([]); // list of poured amounts
-  const [selectedContainerId, setSelectedContainerId] = useState<number | null>(1);
-  const [pouringContainerId, setPouringContainerId] = useState<number | null>(null);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]); // multi-selected container IDs
+  const [isPouring, setIsPouring] = useState<boolean>(false);
 
   const JUG_CAPACITY = 1000; // 1.0 L capacity
 
-  // Fill a selected container to its full capacity
-  const fillContainer = (id: number) => {
-    setContainers(prev =>
-      prev.map(c => (c.id === id ? { ...c, isFull: true } : c))
+  // Toggle container selection
+  const toggleSelectContainer = (id: number) => {
+    if (isPouring) return;
+    setSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(cId => cId !== id) : [...prev, id]
     );
   };
 
-  // Pour water from a full container into the jug
-  const pourContainer = (id: number) => {
-    const container = containers.find(c => c.id === id);
-    if (!container || !container.isFull) return;
-    if (jugVolume >= JUG_CAPACITY) return;
+  // Calculate sum of currently selected volumes
+  const selectedContainers = containers.filter(c => selectedIds.includes(c.id));
+  const selectedTotalVolume = selectedContainers.reduce((sum, c) => sum + c.capacity, 0);
 
-    setPouringContainerId(id);
+  // Pour all selected containers into the jug simultaneously
+  const handlePourSelected = () => {
+    if (selectedIds.length === 0 || isPouring || jugVolume >= JUG_CAPACITY) return;
+
+    setIsPouring(true);
+
+    const volumesToAdd = selectedContainers.map(c => c.capacity);
 
     setTimeout(() => {
-      setContainers(prev =>
-        prev.map(c => (c.id === id ? { ...c, isFull: false } : c))
-      );
-      const addedAmount = container.capacity;
-      setJugVolume(prev => Math.min(JUG_CAPACITY, prev + addedAmount));
-      setPouredHistory(prev => [...prev, addedAmount]);
-      setPouringContainerId(null);
-    }, 600);
+      setJugVolume(prev => Math.min(JUG_CAPACITY, prev + selectedTotalVolume));
+      setPouredHistory(prev => [...prev, ...volumesToAdd]);
+      setSelectedIds([]);
+      setIsPouring(false);
+    }, 700);
   };
 
   // Reset experiment
   const resetExperiment = () => {
-    setContainers(initialContainers);
     setJugVolume(0);
     setPouredHistory([]);
-    setSelectedContainerId(1);
-    setPouringContainerId(null);
+    setSelectedIds([]);
+    setIsPouring(false);
   };
 
   // Litre conversion calculation
@@ -79,8 +76,6 @@ export const Explore: React.FC = () => {
   const divisionString = `${jugVolume} ÷ 1,000 = ${formattedL}`;
   const finalStatement = `${jugVolume} mL = ${formattedL}`;
 
-  const selectedContainer = containers.find(c => c.id === selectedContainerId) || containers[0];
-
   return (
     <div className="space-y-8">
       {/* Header Banner */}
@@ -94,12 +89,12 @@ export const Explore: React.FC = () => {
             EXPLORE: Measuring Jug & 10 Containers Lab
           </h2>
           <p className="text-emerald-100 text-sm md:text-base max-w-xl">
-            Fill containers (10 mL to 100 mL) and pour them into the measuring jug. Watch the liquid level rise and inspect the live calculation panel!
+            Select multiple containers (10 mL to 100 mL) and click the full-width Fill button at the bottom to pour them into the jug simultaneously!
           </p>
         </div>
 
         <Mascot
-          message="Select any container (10 mL to 100 mL), fill it up, and pour its water into the jug to observe unit conversions!"
+          message="Click containers to select them, then press the Fill button at the bottom to pour water together into the jug!"
           mood="cheering"
           size="md"
         />
@@ -221,8 +216,8 @@ export const Explore: React.FC = () => {
             </svg>
 
             {/* Pouring Stream Animation */}
-            {pouringContainerId !== null && (
-              <div className="absolute top-0 right-10 w-2.5 h-48 bg-cyan-400 rounded-full animate-pulse z-20" />
+            {isPouring && (
+              <div className="absolute top-0 right-10 w-3 h-52 bg-cyan-400 rounded-full animate-pulse z-20" />
             )}
           </div>
 
@@ -236,8 +231,8 @@ export const Explore: React.FC = () => {
           </div>
         </div>
 
-        {/* TOP ROW RIGHT: Ten Measuring Glasses & Selected Container Action Box */}
-        <div className="lg:col-span-7 bg-white rounded-3xl p-6 md:p-8 border-2 border-slate-100 shadow-lg space-y-6 flex flex-col justify-between">
+        {/* TOP ROW RIGHT: Ten Measuring Glasses & One Full-Width Fill Button at Bottom */}
+        <div className="lg:col-span-7 bg-white rounded-3xl p-6 md:p-8 border-2 border-slate-100 shadow-lg flex flex-col justify-between space-y-6">
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
               <div>
@@ -245,36 +240,42 @@ export const Explore: React.FC = () => {
                   Ten Measuring Glasses
                 </h3>
                 <p className="text-xs text-slate-500 font-semibold mt-0.5">
-                  Capacities: 10 mL, 20 mL, 30 mL, ..., 100 mL
+                  Click containers to select/deselect them for pouring together.
                 </p>
               </div>
               <span className="text-xs font-extrabold text-cyan-700 bg-cyan-50 px-3 py-1 rounded-full border border-cyan-200 shrink-0">
-                10 Containers
+                {selectedIds.length} Selected ({selectedTotalVolume} mL)
               </span>
             </div>
 
             {/* 10 Glasses Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
               {containers.map((c) => {
-                const isSelected = selectedContainerId === c.id;
-                const isPouring = pouringContainerId === c.id;
+                const isSelected = selectedIds.includes(c.id);
 
                 return (
                   <div
                     key={c.id}
-                    onClick={() => setSelectedContainerId(c.id)}
-                    className={`p-2.5 rounded-2xl border-2 cursor-pointer transition-all flex flex-col items-center justify-between space-y-1.5 ${
+                    onClick={() => toggleSelectContainer(c.id)}
+                    className={`p-3 rounded-2xl border-2 cursor-pointer transition-all flex flex-col items-center justify-between space-y-2 relative ${
                       isSelected
-                        ? 'bg-cyan-50 border-cyan-500 shadow-md scale-102'
+                        ? 'bg-cyan-100/80 border-cyan-500 shadow-md ring-2 ring-cyan-400 scale-102'
                         : 'bg-slate-50/80 border-slate-200 hover:border-cyan-300'
                     }`}
                   >
+                    {/* Visual Checked Badge */}
+                    {isSelected && (
+                      <div className="absolute top-1.5 right-1.5 text-cyan-700">
+                        <CheckCircle2 className="w-4 h-4 fill-cyan-500 text-white" />
+                      </div>
+                    )}
+
                     <span className="text-[10px] font-black uppercase text-slate-500">
                       #{c.id}
                     </span>
 
                     {/* SVG Glass Container */}
-                    <div className={`relative w-8 h-16 flex items-end justify-center ${isPouring ? 'animate-bounce' : ''}`}>
+                    <div className={`relative w-8 h-16 flex items-end justify-center ${isPouring && isSelected ? 'animate-bounce' : ''}`}>
                       <svg viewBox="0 0 40 80" className="w-full h-full drop-shadow-xs">
                         <path
                           d="M 5,10 L 35,10 L 32,72 C 32,75 29,77 25,77 L 15,77 C 11,77 8,75 8,72 Z"
@@ -283,13 +284,11 @@ export const Explore: React.FC = () => {
                           strokeWidth="2"
                         />
                         <line x1="8" y1={75 - (c.capacity / 100) * 60} x2="18" y2={75 - (c.capacity / 100) * 60} stroke="#0369a1" strokeWidth="2" />
-                        {c.isFull && (
-                          <path
-                            d={`M 6,${75 - (c.capacity / 100) * 60} L 34,${75 - (c.capacity / 100) * 60} L 31,71 C 31,73 28,75 24,75 L 16,75 C 12,75 9,73 9,71 Z`}
-                            fill="#38bdf8"
-                            opacity="0.9"
-                          />
-                        )}
+                        <path
+                          d={`M 6,${75 - (c.capacity / 100) * 60} L 34,${75 - (c.capacity / 100) * 60} L 31,71 C 31,73 28,75 24,75 L 16,75 C 12,75 9,73 9,71 Z`}
+                          fill="#38bdf8"
+                          opacity={isSelected ? "0.95" : "0.6"}
+                        />
                       </svg>
                     </div>
 
@@ -298,70 +297,34 @@ export const Explore: React.FC = () => {
                         {c.capacity} mL
                       </span>
                     </div>
-
-                    {!c.isFull ? (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedContainerId(c.id);
-                          fillContainer(c.id);
-                        }}
-                        className="w-full py-1 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white font-black text-[10px] transition-colors"
-                      >
-                        Fill
-                      </button>
-                    ) : (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedContainerId(c.id);
-                          pourContainer(c.id);
-                        }}
-                        disabled={jugVolume >= JUG_CAPACITY}
-                        className="w-full py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] transition-colors disabled:opacity-40"
-                      >
-                        Pour
-                      </button>
-                    )}
                   </div>
                 );
               })}
             </div>
           </div>
 
-          {/* Quick Selected Container Action Controls */}
-          <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div>
-              <span className="text-xs font-black text-slate-800 block">
-                Selected: Glass #{selectedContainer.id} ({selectedContainer.capacity} mL)
+          {/* ONE FULL-WIDTH FILL BUTTON AT VERY BOTTOM OF CONTAINER AREA */}
+          <div className="pt-2">
+            <button
+              onClick={handlePourSelected}
+              disabled={selectedIds.length === 0 || isPouring || jugVolume >= JUG_CAPACITY}
+              className={`w-full py-4 px-6 rounded-2xl font-black text-sm sm:text-base shadow-lg transition-all flex items-center justify-center gap-3 ${
+                selectedIds.length > 0 && !isPouring && jugVolume < JUG_CAPACITY
+                  ? 'bg-gradient-to-r from-cyan-600 to-emerald-600 hover:from-cyan-700 hover:to-emerald-700 text-white hover:shadow-cyan-500/25 active:scale-99'
+                  : 'bg-slate-200 text-slate-500 cursor-not-allowed shadow-none'
+              }`}
+            >
+              <Droplets className={`w-5 h-5 ${isPouring ? 'animate-spin' : ''}`} />
+              <span>
+                {isPouring
+                  ? 'Pouring Water into Jug...'
+                  : jugVolume >= JUG_CAPACITY
+                  ? 'Jug is Full (1,000 mL Max Capacity)'
+                  : selectedIds.length === 0
+                  ? 'Select Containers Above to Pour'
+                  : `Fill & Pour ${selectedIds.length} Selected Container${selectedIds.length > 1 ? 's' : ''} (${selectedTotalVolume} mL) into Jug`}
               </span>
-              <span className={`inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-[10px] font-black ${
-                selectedContainer.isFull ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'
-              }`}>
-                {selectedContainer.isFull ? 'FULL (Water Loaded)' : 'EMPTY'}
-              </span>
-            </div>
-
-            <div className="flex gap-2 w-full sm:w-auto">
-              {!selectedContainer.isFull ? (
-                <button
-                  onClick={() => fillContainer(selectedContainer.id)}
-                  className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-1.5"
-                >
-                  <Droplets className="w-4 h-4" />
-                  <span>Fill Glass</span>
-                </button>
-              ) : (
-                <button
-                  onClick={() => pourContainer(selectedContainer.id)}
-                  disabled={jugVolume >= JUG_CAPACITY}
-                  className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white font-black text-xs shadow-sm transition-all flex items-center justify-center gap-1.5"
-                >
-                  <ArrowRight className="w-4 h-4" />
-                  <span>Pour Water</span>
-                </button>
-              )}
-            </div>
+            </button>
           </div>
 
         </div>
