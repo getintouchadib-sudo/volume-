@@ -40,22 +40,23 @@
 
 ### 📹 How to Change the WATCH Section YouTube Video
 
-The YouTube video config is stored in a single, dedicated configuration file:
+There are **two ways** to update the video in the WATCH section:
 
-📁 **`src/config/videoConfig.ts`**
+#### Method 1: Using the In-App Text Input Box (No code editing required!)
+1. Open the **WATCH** tab on the website.
+2. Paste any YouTube video URL into the **"Paste YouTube Video Link"** box (e.g. `https://www.youtube.com/watch?v=P1c0B9_aOlo` or `https://youtu.be/...`).
+3. Click **"Load Video"**. The embedded video player updates instantly!
 
-To replace or update the embedded video:
-1. Open `src/config/videoConfig.ts`.
-2. Modify the `YOUTUBE_VIDEO_ID` variable:
-   ```typescript
-   export const YOUTUBE_VIDEO_CONFIG = {
-     YOUTUBE_VIDEO_ID: "P1c0B9_aOlo", // Change this ID
-     YOUTUBE_VIDEO_URL: "https://www.youtube.com/watch?v=P1c0B9_aOlo",
-     TITLE: "Watch and Learn: Converting Litres and Millilitres",
-     DESCRIPTION: "Observe how litres (L) and millilitres (mL) relate..."
-   };
-   ```
-3. Save the file. The website player and fallback watch links update automatically!
+#### Method 2: Editing the Configuration File
+Open `src/config/videoConfig.ts`:
+```typescript
+export const YOUTUBE_VIDEO_CONFIG = {
+  YOUTUBE_VIDEO_ID: "P1c0B9_aOlo", // Change video ID here
+  YOUTUBE_VIDEO_URL: "https://www.youtube.com/watch?v=P1c0B9_aOlo",
+  TITLE: "Watch and Learn: Converting Litres and Millilitres",
+  DESCRIPTION: "Observe how litres (L) and millilitres (mL) relate..."
+};
+```
 
 ---
 
@@ -67,11 +68,11 @@ app/
 │   ├── components/
 │   │   ├── Header.tsx        # Responsive navigation header
 │   │   ├── Footer.tsx        # Footer with DSKP alignment notes & links
-│   │   ├── Home.tsx          # Homepage with hero title & 4 navigation cards
+│   │   ├── Home.tsx          # Homepage with Lesson A Formula Card & Interactive Converter
 │   │   ├── Mascot.tsx        # Animated Sploshy water droplet mascot
 │   │   ├── Learn.tsx         # Textbook module (Lessons A to E & Try It practice)
-│   │   ├── Watch.tsx         # Responsive YouTube video viewer
-│   │   ├── Explore.tsx       # Interactive 1.0 L jug & 10 glasses (100 mL each) simulation
+│   │   ├── Watch.tsx         # Interactive YouTube video viewer & URL loader
+│   │   ├── Explore.tsx       # Interactive jug & 10 containers (10–100 mL) with Calculation Panel
 │   │   ├── Game.tsx          # 3 Game modes: Match, Fill Missing Value, Beat Misconception
 │   │   └── Assessment.tsx    # Pre-test and Post-test quiz & evaluation breakdown
 │   ├── config/
@@ -86,15 +87,13 @@ app/
 
 ---
 
-### ✨ Implemented Features
+### ✨ Key Features
 
-1. **Homepage & Shell:**
-   - Website Title: *Liquid Measure Lab*
-   - Main Heading: *Discover Litres and Millilitres!*
-   - Subtitle: *Learn, watch, explore and play your way to understanding liquid measurement.*
-   - 4 Interactive pathway cards with hover effects & SVG illustrations.
-   - Independent non-linear access (access any section anytime).
-   - Animated water droplet mascot (*Sploshy*) offering tips and encouragement.
+1. **HOMEPAGE & Formula Card (Lesson A):**
+   - **Formula 1 (Litres to Millilitres):** `L × 1,000 = mL` (e.g., `0.3 L = 0.3 × 1,000 = 300 mL`).
+   - **Formula 2 (Millilitres to Litres):** `mL ÷ 1,000 = L` (e.g., `500 mL = 500 ÷ 1,000 = 0.5 L`).
+   - Pupil-friendly explanations, visual direction arrows, highlighted `×` and `÷` operations, equipment illustrations (1 L jugs and bottles).
+   - **"Try an Example" Interactive Converter Widget:** Allows pupils to input values, choose conversion direction (L→mL or mL→L), and view step-by-step calculations.
 
 2. **LEARN (Textbook-Style Teaching Module):**
    - **Lesson A:** Understanding Litres & Millilitres (1 L = 1,000 mL) with visual capacity jugs (1 L, 500 mL, 250 mL).
@@ -105,16 +104,17 @@ app/
    - "Show Steps" progressive reveal buttons & "Try It" mini-practice with detailed explanatory feedback.
 
 3. **WATCH (YouTube Video Module):**
-   - Single configuration file `src/config/videoConfig.ts`.
-   - Large responsive video player with observation guidelines for pupils.
-   - Fallback watch links & placeholder instructions if video ID is modified or empty.
+   - Dedicated text input box labelled "Paste YouTube Video Link" and "Load Video" button.
+   - Parses standard formats (`watch?v=`, `youtu.be/`, `embed/`).
+   - Responsive video player with observation guidelines for pupils.
 
-4. **EXPLORE (Interactive Jug & 10 Glasses Simulation):**
+4. **EXPLORE (Measuring Jug & 10 Containers Simulation):**
+   - 10 distinct containers with capacities from **10 mL to 100 mL** (10, 20, 30, 40, 50, 60, 70, 80, 90, 100 mL).
    - Transparent 1.0 L measuring jug with scale ticks and liquid surface animation.
-   - 10 small transparent glasses (100 mL each).
-   - Click to fill glasses or pour water into jug (+100 mL).
-   - Live synchronised conversion display (`mL`, decimal `L`, fraction `L`).
-   - "Show Conversion Breakdown" popup modal.
+   - **Automatic Calculation Panel:**
+     1. Sum of poured mL (e.g. `10 mL + 20 mL = 30 mL`).
+     2. Conversion operation (`30 ÷ 1,000 = 0.03 L`).
+     3. Final result (`30 mL = 0.03 L`).
 
 5. **GAME (Interactive Mathematics Games):**
    - **Game A: Match the Measurement** (card pair matching for L and mL).
@@ -131,15 +131,7 @@ app/
 
 ### ✅ Tested Interactions
 - [x] TypeScript compilation (`tsc -b`) & Vite production bundling (`npm run build`).
-- [x] Independent navigation across all 6 main tabs.
-- [x] Progressive "Show Steps" toggling in textbook lessons.
-- [x] Interactive glass filling and pouring into the 1 L jug simulation.
-- [x] Real-time synchronised liquid height and numerical conversion updates.
-- [x] Game matching, quiz selection, misconception true/false checking, and score incrementing.
-- [x] Pre-test and Post-test score calculation and improvement percentage comparison.
-
----
-
-### 📌 Remaining Limitations & Future Work
-- The YouTube embed requires an internet connection to stream videos from YouTube's servers.
-- Additional pupil profile saving or cloud database integration could be added in future versions for longitudinal research.
+- [x] Homepage Lesson A formula cards and interactive "Try an Example" converter widget.
+- [x] WATCH section YouTube URL loading and video embedding.
+- [x] EXPLORE simulation with 10 containers (10 mL–100 mL), filling, pouring, and calculation panel updates.
+- [x] All 3 GAME modes and Assessment Pre/Post-Test scoring.

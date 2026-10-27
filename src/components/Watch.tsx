@@ -1,12 +1,62 @@
 import React, { useState } from 'react';
 import { YOUTUBE_VIDEO_CONFIG } from '../config/videoConfig';
 import { Mascot } from './Mascot';
-import { Tv, ExternalLink, Info, Code, Play, CheckCircle2 } from 'lucide-react';
+import { Tv, ExternalLink, Info, CheckCircle2, Play, AlertCircle, RefreshCw } from 'lucide-react';
+
+/**
+ * Helper to extract 11-character YouTube Video ID from various link formats:
+ * - https://www.youtube.com/watch?v=VIDEO_ID
+ * - https://youtu.be/VIDEO_ID
+ * - https://www.youtube.com/embed/VIDEO_ID
+ * - Or raw 11-character ID
+ */
+const extractYouTubeId = (url: string): string | null => {
+  if (!url) return null;
+  const trimmed = url.trim();
+  const match = trimmed.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+  if (match && match[1]) {
+    return match[1];
+  }
+  if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) {
+    return trimmed;
+  }
+  return null;
+};
 
 export const Watch: React.FC = () => {
-  const [iframeError, setIframeError] = useState(false);
-  const videoId = YOUTUBE_VIDEO_CONFIG.YOUTUBE_VIDEO_ID.trim();
-  const videoUrl = YOUTUBE_VIDEO_CONFIG.YOUTUBE_VIDEO_URL.trim() || `https://www.youtube.com/watch?v=${videoId}`;
+  // Initial default video URL or ID from configuration
+  const defaultUrl = YOUTUBE_VIDEO_CONFIG.YOUTUBE_VIDEO_URL ||
+    (YOUTUBE_VIDEO_CONFIG.YOUTUBE_VIDEO_ID ? `https://www.youtube.com/watch?v=${YOUTUBE_VIDEO_CONFIG.YOUTUBE_VIDEO_ID}` : '');
+
+  const [inputUrl, setInputUrl] = useState<string>('');
+  const [activeVideoId, setActiveVideoId] = useState<string | null>(
+    extractYouTubeId(defaultUrl) || extractYouTubeId(YOUTUBE_VIDEO_CONFIG.YOUTUBE_VIDEO_ID)
+  );
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [iframeError, setIframeError] = useState<boolean>(false);
+
+  const handleLoadVideo = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setErrorMessage(null);
+    setIframeError(false);
+
+    if (!inputUrl.trim()) {
+      setErrorMessage('Please paste a valid YouTube video link in the box.');
+      return;
+    }
+
+    const extractedId = extractYouTubeId(inputUrl);
+    if (extractedId) {
+      setActiveVideoId(extractedId);
+      setErrorMessage(null);
+    } else {
+      setErrorMessage('Invalid YouTube URL! Please check your link (e.g., https://www.youtube.com/watch?v=...)');
+    }
+  };
+
+  const currentWatchUrl = activeVideoId
+    ? `https://www.youtube.com/watch?v=${activeVideoId}`
+    : 'https://www.youtube.com';
 
   return (
     <div className="space-y-8">
@@ -32,6 +82,46 @@ export const Watch: React.FC = () => {
         />
       </div>
 
+      {/* Interactive YouTube Link Input Area */}
+      <div className="bg-white rounded-3xl p-6 md:p-8 border-2 border-slate-100 shadow-lg space-y-4">
+        <div>
+          <h3 className="text-lg font-extrabold text-slate-800 flex items-center gap-2">
+            <Tv className="w-5 h-5 text-red-600" />
+            Change / Paste Educational YouTube Video
+          </h3>
+          <p className="text-xs text-slate-500 font-semibold mt-0.5">
+            Paste any YouTube video link below and click &ldquo;Load Video&rdquo; to update the video player instantly!
+          </p>
+        </div>
+
+        <form onSubmit={handleLoadVideo} className="flex flex-col sm:flex-row gap-3">
+          <div className="flex-1">
+            <input
+              type="text"
+              value={inputUrl}
+              onChange={(e) => setInputUrl(e.target.value)}
+              placeholder="Paste YouTube Video Link (e.g. https://www.youtube.com/watch?v=...)"
+              className="w-full py-3 px-4 rounded-2xl bg-slate-50 border-2 border-slate-200 text-slate-800 font-medium text-sm focus:outline-none focus:border-red-500 focus:bg-white transition-all"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="px-6 py-3 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm shadow-md hover:shadow-red-500/20 transition-all shrink-0 flex items-center justify-center gap-2"
+          >
+            <RefreshCw className="w-4 h-4" />
+            <span>Load Video</span>
+          </button>
+        </form>
+
+        {errorMessage && (
+          <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-bold flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
+      </div>
+
       {/* Main Responsive Video Container */}
       <div className="bg-white rounded-3xl p-6 md:p-8 border-2 border-slate-100 shadow-lg space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
@@ -44,22 +134,24 @@ export const Watch: React.FC = () => {
             </p>
           </div>
 
-          <a
-            href={videoUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs border border-red-200 transition-colors shrink-0"
-          >
-            <ExternalLink className="w-4 h-4 text-red-600" />
-            <span>Open on YouTube</span>
-          </a>
+          {activeVideoId && (
+            <a
+              href={currentWatchUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs border border-red-200 transition-colors shrink-0"
+            >
+              <ExternalLink className="w-4 h-4 text-red-600" />
+              <span>Open on YouTube</span>
+            </a>
+          )}
         </div>
 
-        {/* Player Box or Placeholder */}
-        {videoId && !iframeError ? (
+        {/* Player Box or Helpful Placeholder */}
+        {activeVideoId && !iframeError ? (
           <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-inner border-2 border-slate-200">
             <iframe
-              src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=0&rel=0`}
+              src={`https://www.youtube-nocookie.com/embed/${activeVideoId}?autoplay=0&rel=0`}
               title="Educational Liquid Measurement Video"
               className="w-full h-full border-0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -68,7 +160,6 @@ export const Watch: React.FC = () => {
             />
           </div>
         ) : (
-          /* Placeholder / Error instructions when video ID is missing or blocked */
           <div className="bg-slate-900 text-white rounded-2xl p-8 md:p-12 text-center space-y-6 border-2 border-slate-800 shadow-inner">
             <div className="w-20 h-20 mx-auto rounded-full bg-red-500/20 text-red-400 flex items-center justify-center border border-red-500/30">
               <Play className="w-10 h-10 ml-1" />
@@ -76,34 +167,12 @@ export const Watch: React.FC = () => {
 
             <div className="space-y-2 max-w-lg mx-auto">
               <h4 className="text-2xl font-black text-white">
-                YouTube Video Player Placeholder
+                Add a YouTube video to start learning!
               </h4>
               <p className="text-slate-300 text-sm leading-relaxed">
-                No YouTube Video ID is currently loaded, or embedded playback is restricted.
+                Paste any YouTube video URL into the box above and click &ldquo;Load Video&rdquo; to embed it here!
               </p>
             </div>
-
-            <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 max-w-md mx-auto text-left space-y-2 text-xs">
-              <div className="flex items-center gap-2 text-amber-400 font-bold">
-                <Code className="w-4 h-4" />
-                <span>How to Add / Replace YouTube Video:</span>
-              </div>
-              <ol className="list-decimal list-inside space-y-1 text-slate-300 font-mono">
-                <li>Open <strong className="text-cyan-400">src/config/videoConfig.ts</strong></li>
-                <li>Set <strong className="text-cyan-400">YOUTUBE_VIDEO_ID</strong> to your video ID</li>
-                <li>Save file & player updates instantly!</li>
-              </ol>
-            </div>
-
-            <a
-              href={videoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm transition-all"
-            >
-              <ExternalLink className="w-4 h-4" />
-              <span>Watch Video Directly on YouTube</span>
-            </a>
           </div>
         )}
 
