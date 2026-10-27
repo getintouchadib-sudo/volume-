@@ -13,7 +13,9 @@ import {
   Award,
   Printer,
   RotateCcw,
-  UserCheck
+  UserCheck,
+  AlertCircle,
+  Play
 } from 'lucide-react';
 
 type GamePart = 'part-a' | 'part-b' | 'part-c';
@@ -44,9 +46,13 @@ interface MisconceptionItem {
 }
 
 export const Game: React.FC = () => {
+  // Name requirement state
+  const [hasStartedGame, setHasStartedGame] = useState<boolean>(false);
+  const [pupilNameInput, setPupilNameInput] = useState<string>('');
+  const [studentName, setStudentName] = useState<string>('');
+  const [nameError, setNameError] = useState<string | null>(null);
+
   const [activePart, setActivePart] = useState<GamePart>('part-a');
-  const [pupilName, setPupilName] = useState<string>('');
-  const [submittedName, setSubmittedName] = useState<string>('Year 5 Explorer');
 
   // Progression & Score State
   const [partAPassed, setPartAPassed] = useState<boolean>(false);
@@ -72,6 +78,18 @@ export const Game: React.FC = () => {
       spread: 80,
       origin: { y: 0.6 }
     });
+  };
+
+  const handleStartGame = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const trimmed = pupilNameInput.trim();
+    if (!trimmed) {
+      setNameError('Please enter your name before starting the game.');
+      return;
+    }
+    setNameError(null);
+    setStudentName(trimmed);
+    setHasStartedGame(true);
   };
 
   // --------------------------------------------------------------------------
@@ -120,7 +138,6 @@ export const Game: React.FC = () => {
         if (newMatched.length === initialMatchPairs.length) {
           // Finished Part A
           const totalAttempts = initialMatchPairs.length + matchMistakes;
-          // Calculate score based on correct pairs out of total attempts, capped appropriately
           const correct = initialMatchPairs.length;
           const scorePct = Math.round((correct / totalAttempts) * 100);
           setPartAScore(scorePct);
@@ -220,7 +237,6 @@ export const Game: React.FC = () => {
     setFillSubmitted(true);
 
     if (currentFillIdx === fillQuestions.length - 1) {
-      // Finished Part B
       let correct = 0;
       fillQuestions.forEach((fq) => {
         if (newAnswers[fq.id] === fq.correctAnswer) {
@@ -315,7 +331,6 @@ export const Game: React.FC = () => {
     setMcSubmitted(true);
 
     if (currentMcIdx === misconceptionItems.length - 1) {
-      // Finished Part C
       let correct = 0;
       misconceptionItems.forEach((m) => {
         if (newAnswers[m.id] === m.isCorrect) {
@@ -359,6 +374,87 @@ export const Game: React.FC = () => {
     window.print();
   };
 
+  // --------------------------------------------------------------------------
+  // RENDER STUDENT NAME ENTRY SCREEN (IF GAME HAS NOT STARTED)
+  // --------------------------------------------------------------------------
+  if (!hasStartedGame) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-8">
+        <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 rounded-3xl p-8 text-white shadow-xl text-center space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-xs font-bold uppercase tracking-wider">
+            <Gamepad2 className="w-4 h-4 text-amber-200" />
+            3-Part Progressive Game Challenge
+          </div>
+          <h2 className="text-3xl md:text-4xl font-black">
+            Welcome to Liquid Measure Challenge!
+          </h2>
+          <p className="text-amber-100 text-sm md:text-base max-w-xl mx-auto">
+            Test your mathematics skills converting litres and millilitres across 3 exciting progressive levels!
+          </p>
+        </div>
+
+        <div className="bg-white rounded-3xl p-8 border-2 border-slate-100 shadow-xl space-y-6">
+          <div className="space-y-2 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-2">
+              <UserCheck className="w-6 h-6" />
+            </div>
+            <h3 className="text-2xl font-black text-slate-900">
+              Enter Your Name to Begin
+            </h3>
+            <p className="text-sm font-semibold text-slate-500">
+              Please enter your name before starting the game.
+            </p>
+          </div>
+
+          <form onSubmit={handleStartGame} className="space-y-5">
+            <div>
+              <label htmlFor="student-name-input" className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                Student Name
+              </label>
+              <input
+                id="student-name-input"
+                type="text"
+                value={pupilNameInput}
+                onChange={(e) => {
+                  setPupilNameInput(e.target.value);
+                  if (nameError) setNameError(null);
+                }}
+                placeholder="Type your full name here..."
+                className="w-full py-3.5 px-4 rounded-2xl bg-slate-50 border-2 border-slate-200 text-slate-900 font-bold text-base focus:outline-none focus:border-amber-500 focus:bg-white transition-all"
+              />
+            </div>
+
+            {nameError && (
+              <div className="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-xl flex items-center gap-3 text-sm font-bold animate-fadeIn">
+                <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+                <span>{nameError}</span>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              className="w-full py-4 px-6 rounded-2xl bg-amber-500 hover:bg-amber-600 active:scale-99 text-slate-950 font-black text-base shadow-lg shadow-amber-200 transition-all flex items-center justify-center gap-2"
+            >
+              <Play className="w-5 h-5 fill-slate-950" />
+              <span>Start Game</span>
+            </button>
+          </form>
+        </div>
+
+        <div className="flex justify-center">
+          <Mascot
+            message="Type your name above and click Start Game to unlock your Year 5 Liquid Measurement Challenge!"
+            mood="happy"
+            size="md"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // MAIN GAME INTERFACE (AFTER VALID NAME IS ENTERED)
+  // --------------------------------------------------------------------------
   return (
     <div className="space-y-8">
       {/* Header Banner */}
@@ -372,45 +468,40 @@ export const Game: React.FC = () => {
             GAME: Liquid Measure Challenge
           </h2>
           <p className="text-amber-100 text-sm md:text-base max-w-xl">
-            Pass Part A (≥ 80%) to unlock Part B, and Part B (≥ 80%) to unlock Part C to earn your Official Certificate of Achievement!
+            Welcome, <strong className="text-white underline decoration-amber-300 font-extrabold">{studentName}</strong>! Pass Part A (≥ 80%) to unlock Part B, and Part B (≥ 80%) to unlock Part C to earn your Official Certificate of Achievement!
           </p>
         </div>
 
         <Mascot
           message={
             allPartsPassed
-              ? "Congratulations! You passed all three parts and earned your Certificate!"
-              : "Complete each part with at least 80% to unlock the next level!"
+              ? `Outstanding job, ${studentName}! You passed all three parts and earned your Certificate!`
+              : `Welcome ${studentName}! Complete each part with at least 80% to unlock the next level!`
           }
           mood={allPartsPassed ? "cheering" : "happy"}
           size="md"
         />
       </div>
 
-      {/* Pupil Name Banner for Certificate */}
-      <div className="bg-white p-6 rounded-3xl border-2 border-slate-100 shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="space-y-1 text-center sm:text-left">
-          <h3 className="font-extrabold text-slate-800 text-base flex items-center gap-2 justify-center sm:justify-start">
-            <UserCheck className="w-5 h-5 text-amber-600" />
-            Pupil Name for Certificate
-          </h3>
-          <p className="text-xs font-semibold text-slate-500">
-            Enter your name below so it appears on your Certificate of Achievement!
-          </p>
+      {/* Student Badge Bar */}
+      <div className="bg-white p-4 px-6 rounded-3xl border-2 border-slate-100 shadow-xs flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-black">
+            <UserCheck className="w-5 h-5" />
+          </div>
+          <div>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
+              Active Student
+            </span>
+            <span className="text-lg font-black text-slate-900">
+              {studentName}
+            </span>
+          </div>
         </div>
 
-        <div className="w-full sm:w-auto">
-          <input
-            type="text"
-            value={pupilName}
-            onChange={(e) => {
-              setPupilName(e.target.value);
-              setSubmittedName(e.target.value.trim() || 'Year 5 Explorer');
-            }}
-            placeholder="Enter your name..."
-            className="w-full sm:w-64 py-2.5 px-4 rounded-xl bg-slate-50 border-2 border-slate-200 text-slate-800 font-bold text-sm focus:outline-none focus:border-amber-500 focus:bg-white"
-          />
-        </div>
+        <span className="text-xs font-extrabold px-3 py-1.5 rounded-full bg-amber-100 text-amber-900">
+          Year 5 • DSKP 5.3.1
+        </span>
       </div>
 
       {/* Progressive Part Tabs */}
@@ -564,7 +655,7 @@ export const Game: React.FC = () => {
                   <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
                   <h4 className="text-2xl font-black">Part A Passed! Score: {partAScore}%</h4>
                   <p className="text-sm font-medium">
-                    Awesome job! You have unlocked Part B — Fill in the Missing Value.
+                    Awesome job, {studentName}! You have unlocked Part B — Fill in the Missing Value.
                   </p>
                   <button
                     onClick={() => setActivePart('part-b')}
@@ -727,7 +818,7 @@ export const Game: React.FC = () => {
                       <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
                       <h4 className="text-2xl font-black">Part B Passed! Score: {partBScore}%</h4>
                       <p className="text-sm font-medium">
-                        Great job! You have unlocked Part C — Beat the Misconception.
+                        Great job, {studentName}! You have unlocked Part C — Beat the Misconception.
                       </p>
                       <button
                         onClick={() => setActivePart('part-c')}
@@ -882,7 +973,7 @@ export const Game: React.FC = () => {
                       <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
                       <h4 className="text-2xl font-black">Part C Passed! Score: {partCScore}%</h4>
                       <p className="text-sm font-medium">
-                        Fantastic achievement! You passed all three game parts and earned your Certificate!
+                        Fantastic achievement, {studentName}! You passed all three game parts and earned your Certificate!
                       </p>
                     </>
                   ) : (
@@ -942,7 +1033,7 @@ export const Game: React.FC = () => {
                 PROUDLY PRESENTED TO
               </span>
               <p className="text-3xl md:text-4xl font-black text-cyan-800 underline decoration-amber-400 decoration-wavy">
-                {submittedName}
+                {studentName}
               </p>
             </div>
 

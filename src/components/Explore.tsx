@@ -11,14 +11,15 @@ import {
 
 interface ContainerData {
   id: number; // 1 to 10
-  capacity: number; // 10 mL to 100 mL
+  capacity: number; // in mL
 }
 
 export const Explore: React.FC = () => {
-  // 10 containers with capacities 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 mL
-  const containers: ContainerData[] = Array.from({ length: 10 }, (_, i) => ({
+  // 10 containers with capacities: 10, 30, 50, 10, 100, 200, 300, 400, 500, 100 mL
+  const containerCapacities = [10, 30, 50, 10, 100, 200, 300, 400, 500, 100];
+  const containers: ContainerData[] = containerCapacities.map((cap, i) => ({
     id: i + 1,
-    capacity: (i + 1) * 10
+    capacity: cap
   }));
 
   const [jugVolume, setJugVolume] = useState<number>(0); // total mL in jug
@@ -289,6 +290,9 @@ export const Explore: React.FC = () => {
               {containers.map((c) => {
                 const count = selectedCounts[c.id] || 0;
                 const isSelected = count > 0;
+                // Calculate visual liquid height in glass SVG (scaled from 10 mL to 500 mL)
+                const fillRatio = 0.15 + (c.capacity / 500) * 0.75;
+                const waterY = 75 - fillRatio * 55;
 
                 return (
                   <div
@@ -320,9 +324,9 @@ export const Explore: React.FC = () => {
                           stroke="#0284c7"
                           strokeWidth="2"
                         />
-                        <line x1="8" y1={75 - (c.capacity / 100) * 60} x2="18" y2={75 - (c.capacity / 100) * 60} stroke="#0369a1" strokeWidth="2" />
+                        <line x1="8" y1={waterY} x2="18" y2={waterY} stroke="#0369a1" strokeWidth="2" />
                         <path
-                          d={`M 6,${75 - (c.capacity / 100) * 60} L 34,${75 - (c.capacity / 100) * 60} L 31,71 C 31,73 28,75 24,75 L 16,75 C 12,75 9,73 9,71 Z`}
+                          d={`M 6,${waterY} L 34,${waterY} L 31,71 C 31,73 28,75 24,75 L 16,75 C 12,75 9,73 9,71 Z`}
                           fill="#38bdf8"
                           opacity={isSelected ? "0.95" : "0.6"}
                         />
