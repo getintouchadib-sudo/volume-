@@ -6,7 +6,7 @@ import {
   Info,
   Calculator,
   Droplets,
-  CheckCircle2
+  AlertCircle
 } from 'lucide-react';
 
 interface ContainerData {
@@ -23,35 +23,62 @@ export const Explore: React.FC = () => {
 
   const [jugVolume, setJugVolume] = useState<number>(0); // total mL in jug
   const [pouredHistory, setPouredHistory] = useState<number[]>([]); // list of poured amounts
-  const [selectedIds, setSelectedIds] = useState<number[]>([]); // multi-selected container IDs
+  const [selectedCounts, setSelectedCounts] = useState<Record<number, number>>({}); // map of container ID -> count
   const [isPouring, setIsPouring] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const JUG_CAPACITY = 1000; // 1.0 L capacity
 
-  // Toggle container selection
-  const toggleSelectContainer = (id: number) => {
-    if (isPouring) return;
-    setSelectedIds(prev =>
-      prev.includes(id) ? prev.filter(cId => cId !== id) : [...prev, id]
-    );
-  };
+  // Calculate pending volume across all current container selections
+  const pendingVolume = containers.reduce((sum, c) => {
+    const count = selectedCounts[c.id] || 0;
+    return sum + count * c.capacity;
+  }, 0);
 
-  // Calculate sum of currently selected volumes
-  const selectedContainers = containers.filter(c => selectedIds.includes(c.id));
-  const selectedTotalVolume = selectedContainers.reduce((sum, c) => sum + c.capacity, 0);
+  // Total selected items count
+  const totalSelectedUnits = Object.values(selectedCounts).reduce((sum, count) => sum + count, 0);
+
+  // Handle clicking a container to increase selection count (or block if exceeding 1,000 mL)
+  const handleSelectContainer = (id: number) => {
+    if (isPouring) return;
+
+    const container = containers.find(c => c.id === id);
+    if (!container) return;
+
+    // Check if adding this container capacity exceeds jug's remaining capacity
+    if (jugVolume + pendingVolume + container.capacity > JUG_CAPACITY) {
+      setToastMessage('The jug can hold a maximum of 1,000 mL!');
+      setTimeout(() => setToastMessage(null), 3000);
+      return;
+    }
+
+    setToastMessage(null);
+    setSelectedCounts(prev => ({
+      ...prev,
+      [id]: (prev[id] || 0) + 1
+    }));
+  };
 
   // Pour all selected containers into the jug simultaneously
   const handlePourSelected = () => {
-    if (selectedIds.length === 0 || isPouring || jugVolume >= JUG_CAPACITY) return;
+    if (pendingVolume === 0 || isPouring || jugVolume >= JUG_CAPACITY) return;
 
     setIsPouring(true);
+    setToastMessage(null);
 
-    const volumesToAdd = selectedContainers.map(c => c.capacity);
+    // Build array of added volumes for history and calculation panel
+    const addedVolumes: number[] = [];
+    containers.forEach(c => {
+      const count = selectedCounts[c.id] || 0;
+      for (let i = 0; i < count; i++) {
+        addedVolumes.push(c.capacity);
+      }
+    });
 
     setTimeout(() => {
-      setJugVolume(prev => Math.min(JUG_CAPACITY, prev + selectedTotalVolume));
-      setPouredHistory(prev => [...prev, ...volumesToAdd]);
-      setSelectedIds([]);
+      setJugVolume(prev => Math.min(JUG_CAPACITY, prev + pendingVolume));
+      setPouredHistory(prev => [...prev, ...addedVolumes]);
+      setSelectedCounts({});
       setIsPouring(false);
     }, 700);
   };
@@ -60,8 +87,9 @@ export const Explore: React.FC = () => {
   const resetExperiment = () => {
     setJugVolume(0);
     setPouredHistory([]);
-    setSelectedIds([]);
+    setSelectedCounts({});
     setIsPouring(false);
+    setToastMessage(null);
   };
 
   // Litre conversion calculation
@@ -89,16 +117,24 @@ export const Explore: React.FC = () => {
             EXPLORE: Measuring Jug & 10 Containers Lab
           </h2>
           <p className="text-emerald-100 text-sm md:text-base max-w-xl">
-            Select multiple containers (10 mL to 100 mL) and click the full-width Fill button at the bottom to pour them into the jug simultaneously!
+            Click containers to select them multiple times (displays 2×, 3×, etc.). Press the full-width Fill button to pour water into the jug!
           </p>
         </div>
 
         <Mascot
-          message="Click containers to select them, then press the Fill button at the bottom to pour water together into the jug!"
+          message="Click containers repeatedly to select multiple units, then press the Fill button at the bottom to pour water into the jug!"
           mood="cheering"
           size="md"
         />
       </div>
+
+      {/* Capacity Warning Toast Alert */}
+      {toastMessage && (
+        <div className="bg-amber-100 border-2 border-amber-400 text-amber-900 px-6 py-4 rounded-2xl shadow-lg flex items-center gap-3 animate-fadeIn">
+          <AlertCircle className="w-6 h-6 text-amber-600 shrink-0" />
+          <span className="font-extrabold text-sm md:text-base">{toastMessage}</span>
+        </div>
+      )}
 
       {/* Reset & Toolbar Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-3xl border-2 border-slate-100 shadow-sm">
@@ -240,37 +276,38 @@ export const Explore: React.FC = () => {
                   Ten Measuring Glasses
                 </h3>
                 <p className="text-xs text-slate-500 font-semibold mt-0.5">
-                  Click containers to select/deselect them for pouring together.
+                  Click containers repeatedly to select multiple units (2×, 3×, etc.).
                 </p>
               </div>
               <span className="text-xs font-extrabold text-cyan-700 bg-cyan-50 px-3 py-1 rounded-full border border-cyan-200 shrink-0">
-                {selectedIds.length} Selected ({selectedTotalVolume} mL)
+                {totalSelectedUnits} Selection{totalSelectedUnits !== 1 ? 's' : ''} ({pendingVolume} mL Pending)
               </span>
             </div>
 
             {/* 10 Glasses Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
               {containers.map((c) => {
-                const isSelected = selectedIds.includes(c.id);
+                const count = selectedCounts[c.id] || 0;
+                const isSelected = count > 0;
 
                 return (
                   <div
                     key={c.id}
-                    onClick={() => toggleSelectContainer(c.id)}
+                    onClick={() => handleSelectContainer(c.id)}
                     className={`p-3 rounded-2xl border-2 cursor-pointer transition-all flex flex-col items-center justify-between space-y-2 relative ${
                       isSelected
                         ? 'bg-cyan-100/80 border-cyan-500 shadow-md ring-2 ring-cyan-400 scale-102'
                         : 'bg-slate-50/80 border-slate-200 hover:border-cyan-300'
                     }`}
                   >
-                    {/* Visual Checked Badge */}
+                    {/* Multiplier Badge directly above container */}
                     {isSelected && (
-                      <div className="absolute top-1.5 right-1.5 text-cyan-700">
-                        <CheckCircle2 className="w-4 h-4 fill-cyan-500 text-white" />
+                      <div className="absolute -top-2.5 bg-cyan-600 text-white text-[11px] font-black px-2 py-0.5 rounded-full shadow-sm border border-white">
+                        {count}×
                       </div>
                     )}
 
-                    <span className="text-[10px] font-black uppercase text-slate-500">
+                    <span className="text-[10px] font-black uppercase text-slate-500 pt-1">
                       #{c.id}
                     </span>
 
@@ -307,9 +344,9 @@ export const Explore: React.FC = () => {
           <div className="pt-2">
             <button
               onClick={handlePourSelected}
-              disabled={selectedIds.length === 0 || isPouring || jugVolume >= JUG_CAPACITY}
+              disabled={pendingVolume === 0 || isPouring || jugVolume >= JUG_CAPACITY}
               className={`w-full py-4 px-6 rounded-2xl font-black text-sm sm:text-base shadow-lg transition-all flex items-center justify-center gap-3 ${
-                selectedIds.length > 0 && !isPouring && jugVolume < JUG_CAPACITY
+                pendingVolume > 0 && !isPouring && jugVolume < JUG_CAPACITY
                   ? 'bg-gradient-to-r from-cyan-600 to-emerald-600 hover:from-cyan-700 hover:to-emerald-700 text-white hover:shadow-cyan-500/25 active:scale-99'
                   : 'bg-slate-200 text-slate-500 cursor-not-allowed shadow-none'
               }`}
@@ -320,9 +357,9 @@ export const Explore: React.FC = () => {
                   ? 'Pouring Water into Jug...'
                   : jugVolume >= JUG_CAPACITY
                   ? 'Jug is Full (1,000 mL Max Capacity)'
-                  : selectedIds.length === 0
+                  : pendingVolume === 0
                   ? 'Select Containers Above to Pour'
-                  : `Fill & Pour ${selectedIds.length} Selected Container${selectedIds.length > 1 ? 's' : ''} (${selectedTotalVolume} mL) into Jug`}
+                  : `Fill & Pour Selected Containers (${pendingVolume} mL) into Jug`}
               </span>
             </button>
           </div>
