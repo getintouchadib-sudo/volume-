@@ -54,20 +54,21 @@ export const Learn: React.FC = () => {
   const lessons: LessonData[] = [
     {
       id: 'lesson-a',
-      title: 'Lesson A: Litres and Millilitres',
-      subtitle: 'Understanding the basic units of liquid volume',
+      title: 'Lesson A: Understanding Litres and Millilitres',
+      subtitle: 'Fundamental units of liquid volume and key conversion formulas',
       ruleBadge: 'KEY RELATIONSHIP',
       ruleText: '1 Litre (L) = 1,000 Millilitres (mL)',
       content: (
-        <div className="space-y-6">
+        <div className="space-y-8">
           <p className="text-slate-700 leading-relaxed text-base md:text-lg">
             Litres (<strong className="text-blue-600 font-bold">L</strong>) and millilitres (
             <strong className="text-cyan-600 font-bold">mL</strong>) are standard units used in Mathematics to measure the volume or capacity of liquids.
           </p>
 
-          <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-6 rounded-2xl text-white shadow-lg text-center space-y-2">
+          {/* Golden Rule Relationship Banner */}
+          <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-6 rounded-3xl text-white shadow-lg text-center space-y-2">
             <span className="text-xs font-black tracking-widest uppercase bg-white/20 px-3 py-1 rounded-full">
-              Golden Rule of Liquid Measurement
+              Golden Relationship
             </span>
             <div className="text-3xl md:text-5xl font-black tracking-tight">
               1 L = 1,000 mL
@@ -77,8 +78,63 @@ export const Learn: React.FC = () => {
             </p>
           </div>
 
-          {/* Visual Jug comparison */}
-          <div className="bg-slate-50 border-2 border-slate-200 rounded-2xl p-6 space-y-4">
+          {/* Section: Formulas Breakdown */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            {/* Converting Litres to Millilitres */}
+            <div className="bg-gradient-to-b from-sky-50 to-blue-50/80 border-2 border-sky-200 rounded-3xl p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="px-3 py-1 rounded-full bg-blue-600 text-white font-bold text-xs">
+                  Converting Litres to Millilitres
+                </span>
+                <span className="text-lg font-black text-blue-600">L → mL</span>
+              </div>
+
+              <div className="bg-white border-2 border-blue-300 p-4 rounded-2xl text-center shadow-xs">
+                <span className="text-2xl md:text-3xl font-black text-blue-900 tracking-tight">
+                  L <span className="text-amber-500 font-black text-3xl md:text-4xl px-1">× 1,000</span> = mL
+                </span>
+              </div>
+
+              <div className="bg-white/90 p-3.5 rounded-xl border border-blue-200 text-xs md:text-sm font-mono space-y-1">
+                <p className="font-bold text-slate-800">Example:</p>
+                <p className="text-blue-900 font-bold">0.3 L = 0.3 × 1,000 mL = 300 mL</p>
+              </div>
+
+              <p className="text-xs md:text-sm text-slate-700 leading-relaxed font-medium">
+                &ldquo;When converting litres to millilitres, multiply by 1,000 because one litre is equal to 1,000 millilitres.&rdquo;
+              </p>
+            </div>
+
+            {/* Converting Millilitres to Litres */}
+            <div className="bg-gradient-to-b from-teal-50 to-emerald-50/80 border-2 border-teal-200 rounded-3xl p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="px-3 py-1 rounded-full bg-emerald-600 text-white font-bold text-xs">
+                  Converting Millilitres to Litres
+                </span>
+                <span className="text-lg font-black text-emerald-600">mL → L</span>
+              </div>
+
+              <div className="bg-white border-2 border-emerald-300 p-4 rounded-2xl text-center shadow-xs">
+                <span className="text-2xl md:text-3xl font-black text-emerald-900 tracking-tight">
+                  mL <span className="text-purple-600 font-black text-3xl md:text-4xl px-1">÷ 1,000</span> = L
+                </span>
+              </div>
+
+              <div className="bg-white/90 p-3.5 rounded-xl border border-teal-200 text-xs md:text-sm font-mono space-y-1">
+                <p className="font-bold text-slate-800">Example:</p>
+                <p className="text-emerald-900 font-bold">500 mL = 500 ÷ 1,000 L = 0.5 L</p>
+              </div>
+
+              <p className="text-xs md:text-sm text-slate-700 leading-relaxed font-medium">
+                &ldquo;When converting millilitres to litres, divide by 1,000 because 1,000 millilitres make one litre.&rdquo;
+              </p>
+            </div>
+
+          </div>
+
+          {/* Visual Jug capacity comparison */}
+          <div className="bg-slate-50 border-2 border-slate-200 rounded-3xl p-6 space-y-4">
             <h4 className="font-bold text-slate-800 text-base md:text-lg text-center">
               Visual Capacity Comparison
             </h4>

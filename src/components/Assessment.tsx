@@ -7,9 +7,9 @@ import {
   XCircle,
   RotateCcw,
   Sparkles,
-  TrendingUp,
-  BarChart2,
-  FileCheck2
+  FileCheck2,
+  UserCheck,
+  Printer
 } from 'lucide-react';
 
 interface AssessmentQuestion {
@@ -23,9 +23,10 @@ interface AssessmentQuestion {
 }
 
 export const Assessment: React.FC = () => {
-  const [testMode, setTestMode] = useState<'pre' | 'post'>('pre');
+  const [pupilName, setPupilName] = useState<string>('');
+  const [submittedName, setSubmittedName] = useState<string>('Year 5 Explorer');
   const [preScore, setPreScore] = useState<number | null>(null);
-  const [postScore, setPostScore] = useState<number | null>(null);
+  const [correctCount, setCorrectCount] = useState<number>(0);
 
   const [currentIdx, setCurrentIdx] = useState<number>(0);
   const [userAnswers, setUserAnswers] = useState<Record<string, number>>({});
@@ -96,23 +97,26 @@ export const Assessment: React.FC = () => {
       }
     });
 
+    setCorrectCount(scoreCount);
     const calculatedPercentage = Math.round((scoreCount / questions.length) * 100);
+    setPreScore(calculatedPercentage);
 
-    if (testMode === 'pre') {
-      setPreScore(calculatedPercentage);
-    } else {
-      setPostScore(calculatedPercentage);
+    if (pupilName.trim()) {
+      setSubmittedName(pupilName.trim());
     }
 
     setIsFinished(true);
-    confetti({ particleCount: 100, spread: 80, origin: { y: 0.5 } });
+    confetti({ particleCount: 120, spread: 90, origin: { y: 0.5 } });
   };
 
-  const resetQuiz = (mode: 'pre' | 'post') => {
-    setTestMode(mode);
+  const resetQuiz = () => {
     setCurrentIdx(0);
     setUserAnswers({});
     setIsFinished(false);
+  };
+
+  const handlePrintCertificate = () => {
+    window.print();
   };
 
   const currentQ = questions[currentIdx];
@@ -143,77 +147,27 @@ export const Assessment: React.FC = () => {
         />
       </div>
 
-      {/* Mode Selector & Pre/Post Comparison Scorecard */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-        {/* Test Mode Selector Card */}
-        <div className="bg-white p-6 rounded-3xl border-2 border-slate-100 shadow-md flex items-center justify-between">
-          <div>
-            <h3 className="font-extrabold text-slate-800 text-lg">
-              Active Assessment Mode
-            </h3>
-            <p className="text-xs font-semibold text-slate-500">
-              Select which test you are attempting:
-            </p>
-          </div>
-
-          <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
-            <button
-              onClick={() => resetQuiz('pre')}
-              className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${
-                testMode === 'pre'
-                  ? 'bg-purple-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              PRE-TEST
-            </button>
-            <button
-              onClick={() => resetQuiz('post')}
-              className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${
-                testMode === 'post'
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              POST-TEST
-            </button>
-          </div>
+      {/* Pupil Name Input Banner */}
+      <div className="bg-white p-6 rounded-3xl border-2 border-slate-100 shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="space-y-1 text-center sm:text-left">
+          <h3 className="font-extrabold text-slate-800 text-lg flex items-center gap-2 justify-center sm:justify-start">
+            <UserCheck className="w-5 h-5 text-purple-600" />
+            Pupil Name for Certificate
+          </h3>
+          <p className="text-xs font-semibold text-slate-500">
+            Enter your name below so it appears on your Certificate of Achievement!
+          </p>
         </div>
 
-        {/* Evaluation Summary Board */}
-        <div className="bg-slate-900 p-6 rounded-3xl text-white shadow-md border border-slate-800 flex items-center justify-around">
-          <div className="text-center">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-purple-300 block">
-              Pre-Test Score
-            </span>
-            <div className="text-3xl font-black text-purple-400">
-              {preScore !== null ? `${preScore}%` : 'Not Taken'}
-            </div>
-          </div>
-
-          <div className="h-10 w-px bg-slate-800" />
-
-          <div className="text-center">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-300 block">
-              Post-Test Score
-            </span>
-            <div className="text-3xl font-black text-indigo-400">
-              {postScore !== null ? `${postScore}%` : 'Not Taken'}
-            </div>
-          </div>
-
-          {preScore !== null && postScore !== null && (
-            <div className="bg-emerald-950/80 p-3 rounded-2xl border border-emerald-500/30 text-center">
-              <span className="text-[10px] font-bold uppercase text-emerald-300 block">Improvement</span>
-              <div className="text-xl font-black text-emerald-400 flex items-center justify-center gap-1">
-                <TrendingUp className="w-4 h-4" />
-                <span>+{postScore - preScore}%</span>
-              </div>
-            </div>
-          )}
+        <div className="w-full sm:w-auto">
+          <input
+            type="text"
+            value={pupilName}
+            onChange={(e) => setPupilName(e.target.value)}
+            placeholder="Enter your name..."
+            className="w-full sm:w-64 py-2.5 px-4 rounded-xl bg-slate-50 border-2 border-slate-200 text-slate-800 font-bold text-sm focus:outline-none focus:border-purple-500 focus:bg-white"
+          />
         </div>
-
       </div>
 
       {/* Main Quiz Area */}
@@ -225,7 +179,7 @@ export const Assessment: React.FC = () => {
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div className="space-y-1">
                 <span className="px-3 py-1 rounded-full bg-purple-100 text-purple-800 text-xs font-bold uppercase">
-                  {testMode.toUpperCase()} TEST • Category: {currentQ.category}
+                  PRE-TEST ASSESSMENT • Category: {currentQ.category}
                 </span>
                 <h3 className="text-lg font-bold text-slate-800">
                   Question {currentIdx + 1} of {totalQuestions}
@@ -297,7 +251,7 @@ export const Assessment: React.FC = () => {
                     className="px-8 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white font-black text-sm shadow-md transition-all flex items-center gap-2"
                   >
                     <Sparkles className="w-4 h-4 text-amber-300" />
-                    <span>Submit {testMode.toUpperCase()} TEST</span>
+                    <span>Submit PRE-TEST Assessment</span>
                   </button>
                 )}
               </div>
@@ -305,23 +259,108 @@ export const Assessment: React.FC = () => {
             </div>
           </>
         ) : (
-          /* Results Summary Page */
+          /* Results & Certificate Display Page */
           <div className="space-y-8">
+
+            {/* Score Summary Box */}
             <div className="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 p-8 rounded-3xl text-white text-center space-y-4 shadow-xl">
               <Sparkles className="w-12 h-12 text-amber-300 mx-auto" />
               <h3 className="text-3xl font-black">
-                {testMode.toUpperCase()} TEST Completed!
+                PRE-TEST ASSESSMENT COMPLETED!
               </h3>
               <p className="text-purple-200 text-base">
-                Your Score: <span className="text-amber-300 font-black text-3xl ml-2">{testMode === 'pre' ? preScore : postScore}%</span>
+                Score: <span className="text-amber-300 font-black text-4xl ml-2">{preScore}%</span>
               </p>
+              <div className="flex flex-wrap justify-center gap-6 text-sm font-bold pt-2">
+                <span className="px-4 py-1.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  Correct Answers: {correctCount} / {totalQuestions}
+                </span>
+                <span className="px-4 py-1.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                  Incorrect Answers: {totalQuestions - correctCount} / {totalQuestions}
+                </span>
+              </div>
+            </div>
+
+            {/* PRINTABLE CERTIFICATE CARD */}
+            <div
+              id="printable-certificate"
+              className="bg-gradient-to-b from-amber-50/80 via-white to-cyan-50/80 rounded-3xl p-8 md:p-12 border-8 border-amber-400 shadow-2xl text-center space-y-6 relative overflow-hidden"
+            >
+              {/* Decorative Corner Seals */}
+              <div className="absolute top-4 left-4 w-12 h-12 rounded-full border-2 border-amber-400/60 flex items-center justify-center text-amber-500">
+                <Sparkles className="w-6 h-6" />
+              </div>
+              <div className="absolute top-4 right-4 w-12 h-12 rounded-full border-2 border-amber-400/60 flex items-center justify-center text-amber-500">
+                <Award className="w-6 h-6" />
+              </div>
+
+              <div className="space-y-2">
+                <span className="text-xs font-black uppercase tracking-widest text-amber-700 bg-amber-100 px-4 py-1 rounded-full">
+                  Liquid Measure Lab • Mathematics Year 5 DSKP 5.3.1
+                </span>
+                <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight pt-2">
+                  Certificate of Achievement
+                </h2>
+                <p className="text-slate-600 font-semibold text-sm">
+                  This certificate confirms the completion of the Pre-Test Assessment
+                </p>
+              </div>
+
+              {/* Recipient Name */}
+              <div className="py-4 border-y-2 border-amber-200 max-w-xl mx-auto space-y-1">
+                <span className="text-xs uppercase text-slate-400 font-bold tracking-wider">
+                  PROUDLY PRESENTED TO
+                </span>
+                <p className="text-3xl md:text-4xl font-black text-cyan-800 underline decoration-amber-400 decoration-wavy">
+                  {submittedName}
+                </p>
+              </div>
+
+              <p className="text-slate-700 text-sm md:text-base max-w-lg mx-auto font-medium leading-relaxed">
+                For successfully taking the <strong>Liquid Measure Lab — Pre-Test Assessment</strong> and demonstrating knowledge in converting liquid volume units between litres and millilitres.
+              </p>
+
+              {/* Score Badges */}
+              <div className="flex justify-center items-center gap-6 py-2">
+                <div className="bg-white border-2 border-amber-300 px-6 py-3 rounded-2xl shadow-sm">
+                  <span className="text-[10px] font-bold uppercase text-slate-400 block">Final Percentage</span>
+                  <span className="text-3xl font-black text-amber-600">{preScore}%</span>
+                </div>
+                <div className="bg-white border-2 border-cyan-300 px-6 py-3 rounded-2xl shadow-sm">
+                  <span className="text-[10px] font-bold uppercase text-slate-400 block">Correct Questions</span>
+                  <span className="text-3xl font-black text-cyan-600">{correctCount} / {totalQuestions}</span>
+                </div>
+              </div>
+
+              <div className="text-xs text-slate-400 font-bold pt-2">
+                Completion Date: {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap justify-center gap-4 pt-4">
+              <button
+                onClick={handlePrintCertificate}
+                className="px-8 py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-sm shadow-md transition-all flex items-center gap-2"
+              >
+                <Printer className="w-5 h-5" />
+                <span>Download / Print Certificate</span>
+              </button>
+
+              <button
+                onClick={resetQuiz}
+                className="px-8 py-3.5 rounded-2xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm shadow-md transition-all flex items-center gap-2"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span>Retake Pre-Test</span>
+              </button>
             </div>
 
             {/* Answer Explanations Breakdown */}
-            <div className="space-y-4">
+            <div className="space-y-4 pt-6 border-t border-slate-200">
               <h4 className="font-extrabold text-slate-800 text-lg flex items-center gap-2">
-                <BarChart2 className="w-5 h-5 text-purple-600" />
-                Detailed Performance Breakdown
+                <FileCheck2 className="w-5 h-5 text-purple-600" />
+                Detailed Questions Breakdown
               </h4>
 
               <div className="space-y-4">
@@ -376,15 +415,6 @@ export const Assessment: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex justify-center gap-4">
-              <button
-                onClick={() => resetQuiz(testMode === 'pre' ? 'post' : 'pre')}
-                className="px-8 py-3.5 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-sm shadow-md transition-all flex items-center gap-2"
-              >
-                <RotateCcw className="w-4 h-4" />
-                <span>Switch to {testMode === 'pre' ? 'POST-TEST' : 'PRE-TEST'}</span>
-              </button>
-            </div>
           </div>
         )}
 

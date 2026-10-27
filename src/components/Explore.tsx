@@ -3,7 +3,6 @@ import { Mascot } from './Mascot';
 import {
   FlaskConical,
   RotateCcw,
-  Sparkles,
   Info,
   Calculator,
   Droplets,
@@ -124,21 +123,21 @@ export const Explore: React.FC = () => {
         </button>
       </div>
 
-      {/* Main Simulation Layout: Jug + Automatic Calculation Panel */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      {/* TOP ROW: Large Measuring Jug (Left) & Ten Measuring Glasses (Right) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
 
-        {/* Left Column: Transparent Measuring Jug */}
-        <div className="lg:col-span-6 bg-white rounded-3xl p-6 md:p-8 border-2 border-slate-100 shadow-lg space-y-6 flex flex-col items-center">
+        {/* TOP ROW LEFT: Large Transparent Measuring Jug */}
+        <div className="lg:col-span-5 bg-white rounded-3xl p-6 md:p-8 border-2 border-slate-100 shadow-lg space-y-6 flex flex-col items-center justify-between">
           <div className="text-center space-y-1">
             <span className="text-xs font-black uppercase tracking-widest text-cyan-600">
-              1.0 Litre Capacity Transparent Jug
+              1.0 Litre Capacity Jug
             </span>
             <h3 className="text-2xl font-black text-slate-900">
-              Measuring Jug Level
+              Measuring Jug
             </h3>
           </div>
 
-          <div className="relative w-64 h-84 flex items-end justify-center">
+          <div className="relative w-60 h-80 flex items-end justify-center">
             {/* SVG Jug */}
             <svg viewBox="0 0 200 260" className="w-full h-full drop-shadow-xl z-10">
               {/* Jug Base & Outline */}
@@ -227,7 +226,7 @@ export const Explore: React.FC = () => {
             )}
           </div>
 
-          <div className="text-center space-y-1 bg-cyan-50 p-4 rounded-2xl border border-cyan-200 w-full">
+          <div className="text-center space-y-1 bg-cyan-50 p-3.5 rounded-2xl border border-cyan-200 w-full">
             <span className="text-xs font-bold text-cyan-800 uppercase block">
               Current Liquid Volume
             </span>
@@ -237,103 +236,131 @@ export const Explore: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Column: Automatic Calculation Panel */}
-        <div className="lg:col-span-6 space-y-6">
-          <div className="bg-gradient-to-r from-slate-900 via-cyan-950 to-slate-900 text-white rounded-3xl p-6 md:p-8 shadow-xl border border-cyan-800 space-y-6">
-
-            <div className="flex items-center justify-between border-b border-cyan-800 pb-4">
-              <div className="flex items-center gap-2">
-                <Calculator className="w-6 h-6 text-amber-400" />
-                <h3 className="text-xl font-black text-white">
-                  Automatic Calculation Panel
+        {/* TOP ROW RIGHT: Ten Measuring Glasses & Selected Container Action Box */}
+        <div className="lg:col-span-7 bg-white rounded-3xl p-6 md:p-8 border-2 border-slate-100 shadow-lg space-y-6 flex flex-col justify-between">
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="text-2xl font-black text-slate-900">
+                  Ten Measuring Glasses
                 </h3>
+                <p className="text-xs text-slate-500 font-semibold mt-0.5">
+                  Capacities: 10 mL, 20 mL, 30 mL, ..., 100 mL
+                </p>
               </div>
-              <span className="px-3 py-1 bg-cyan-900 text-cyan-300 rounded-full text-xs font-bold border border-cyan-700">
-                Live Dynamic Updates
+              <span className="text-xs font-extrabold text-cyan-700 bg-cyan-50 px-3 py-1 rounded-full border border-cyan-200 shrink-0">
+                10 Containers
               </span>
             </div>
 
-            {/* 1. Total Volume in mL */}
-            <div className="bg-slate-800/90 border border-slate-700 p-4 rounded-2xl space-y-2">
-              <span className="text-xs font-bold uppercase text-cyan-300 block">
-                1. Total Volume in Millilitres (mL):
-              </span>
-              <p className="font-mono text-base md:text-lg font-bold text-white bg-slate-900 p-3 rounded-xl border border-slate-700">
-                {additionString}
-              </p>
+            {/* 10 Glasses Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              {containers.map((c) => {
+                const isSelected = selectedContainerId === c.id;
+                const isPouring = pouringContainerId === c.id;
+
+                return (
+                  <div
+                    key={c.id}
+                    onClick={() => setSelectedContainerId(c.id)}
+                    className={`p-2.5 rounded-2xl border-2 cursor-pointer transition-all flex flex-col items-center justify-between space-y-1.5 ${
+                      isSelected
+                        ? 'bg-cyan-50 border-cyan-500 shadow-md scale-102'
+                        : 'bg-slate-50/80 border-slate-200 hover:border-cyan-300'
+                    }`}
+                  >
+                    <span className="text-[10px] font-black uppercase text-slate-500">
+                      #{c.id}
+                    </span>
+
+                    {/* SVG Glass Container */}
+                    <div className={`relative w-8 h-16 flex items-end justify-center ${isPouring ? 'animate-bounce' : ''}`}>
+                      <svg viewBox="0 0 40 80" className="w-full h-full drop-shadow-xs">
+                        <path
+                          d="M 5,10 L 35,10 L 32,72 C 32,75 29,77 25,77 L 15,77 C 11,77 8,75 8,72 Z"
+                          fill="rgba(255, 255, 255, 0.7)"
+                          stroke="#0284c7"
+                          strokeWidth="2"
+                        />
+                        <line x1="8" y1={75 - (c.capacity / 100) * 60} x2="18" y2={75 - (c.capacity / 100) * 60} stroke="#0369a1" strokeWidth="2" />
+                        {c.isFull && (
+                          <path
+                            d={`M 6,${75 - (c.capacity / 100) * 60} L 34,${75 - (c.capacity / 100) * 60} L 31,71 C 31,73 28,75 24,75 L 16,75 C 12,75 9,73 9,71 Z`}
+                            fill="#38bdf8"
+                            opacity="0.9"
+                          />
+                        )}
+                      </svg>
+                    </div>
+
+                    <div className="text-center w-full">
+                      <span className="text-xs font-black text-slate-800 block">
+                        {c.capacity} mL
+                      </span>
+                    </div>
+
+                    {!c.isFull ? (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedContainerId(c.id);
+                          fillContainer(c.id);
+                        }}
+                        className="w-full py-1 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white font-black text-[10px] transition-colors"
+                      >
+                        Fill
+                      </button>
+                    ) : (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedContainerId(c.id);
+                          pourContainer(c.id);
+                        }}
+                        disabled={jugVolume >= JUG_CAPACITY}
+                        className="w-full py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] transition-colors disabled:opacity-40"
+                      >
+                        Pour
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-
-            {/* 2. Conversion Operation */}
-            <div className="bg-slate-800/90 border border-slate-700 p-4 rounded-2xl space-y-2">
-              <span className="text-xs font-bold uppercase text-emerald-300 block">
-                2. Conversion Operation (mL ÷ 1,000 = L):
-              </span>
-              <p className="font-mono text-base md:text-lg font-bold text-emerald-300 bg-slate-900 p-3 rounded-xl border border-slate-700">
-                {divisionString}
-              </p>
-            </div>
-
-            {/* 3. Final Conversion Statement */}
-            <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-4 rounded-2xl text-slate-950 space-y-1 shadow-md">
-              <span className="text-xs font-black uppercase tracking-wider block opacity-90">
-                3. Final Result:
-              </span>
-              <p className="text-2xl font-black">
-                {finalStatement}
-              </p>
-            </div>
-
-            {/* Educational Encouragement Note */}
-            {jugVolume > 0 && (
-              <div className="bg-emerald-950/80 border border-emerald-500/40 p-4 rounded-2xl text-emerald-200 text-xs md:text-sm font-bold flex items-center gap-3">
-                <Sparkles className="w-5 h-5 text-amber-300 shrink-0" />
-                <span>Great! You have measured {formattedL} ({jugVolume} mL) of water in the jug!</span>
-              </div>
-            )}
-
           </div>
 
-          {/* Quick Selected Container Action Box */}
-          <div className="bg-white rounded-3xl p-6 border-2 border-slate-100 shadow-md space-y-4">
-            <div className="flex items-center justify-between">
-              <h4 className="font-black text-slate-800 text-base">
-                Selected Container Action
-              </h4>
-              <span className="px-3 py-1 rounded-full bg-cyan-100 text-cyan-800 text-xs font-bold">
-                Container #{selectedContainer.id} ({selectedContainer.capacity} mL)
+          {/* Quick Selected Container Action Controls */}
+          <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <span className="text-xs font-black text-slate-800 block">
+                Selected: Glass #{selectedContainer.id} ({selectedContainer.capacity} mL)
+              </span>
+              <span className={`inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-[10px] font-black ${
+                selectedContainer.isFull ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'
+              }`}>
+                {selectedContainer.isFull ? 'FULL (Water Loaded)' : 'EMPTY'}
               </span>
             </div>
 
-            <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-              <div className="text-center space-y-1">
-                <span className="text-xs font-bold text-slate-500 block">Status</span>
-                <span className={`px-3 py-1 rounded-lg text-xs font-black ${
-                  selectedContainer.isFull ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'
-                }`}>
-                  {selectedContainer.isFull ? 'FULL (Water Loaded)' : 'EMPTY'}
-                </span>
-              </div>
-
-              <div className="flex-1 flex gap-2">
-                {!selectedContainer.isFull ? (
-                  <button
-                    onClick={() => fillContainer(selectedContainer.id)}
-                    className="flex-1 py-3 px-4 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2"
-                  >
-                    <Droplets className="w-4 h-4" />
-                    <span>Fill Container ({selectedContainer.capacity} mL)</span>
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => pourContainer(selectedContainer.id)}
-                    disabled={jugVolume >= JUG_CAPACITY}
-                    className="flex-1 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white font-black text-xs shadow-md transition-all flex items-center justify-center gap-2"
-                  >
-                    <ArrowRight className="w-4 h-4" />
-                    <span>Pour into Jug (+{selectedContainer.capacity} mL)</span>
-                  </button>
-                )}
-              </div>
+            <div className="flex gap-2 w-full sm:w-auto">
+              {!selectedContainer.isFull ? (
+                <button
+                  onClick={() => fillContainer(selectedContainer.id)}
+                  className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-1.5"
+                >
+                  <Droplets className="w-4 h-4" />
+                  <span>Fill Glass</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => pourContainer(selectedContainer.id)}
+                  disabled={jugVolume >= JUG_CAPACITY}
+                  className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white font-black text-xs shadow-sm transition-all flex items-center justify-center gap-1.5"
+                >
+                  <ArrowRight className="w-4 h-4" />
+                  <span>Pour Water</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -341,115 +368,61 @@ export const Explore: React.FC = () => {
 
       </div>
 
-      {/* TEN DISTINCT MEASURING CONTAINERS GRID (10 mL to 100 mL) */}
-      <div className="bg-white rounded-3xl p-6 md:p-8 border-2 border-slate-100 shadow-lg space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-100 pb-4">
-          <div>
-            <h3 className="text-2xl font-black text-slate-900">
-              Ten Measuring Containers (10 mL to 100 mL)
+      {/* BOTTOM ROW: Automatic Calculation Panel (Spans Full Available Width) */}
+      <div className="bg-gradient-to-r from-slate-900 via-cyan-950 to-slate-900 text-white rounded-3xl p-6 md:p-8 shadow-xl border border-cyan-800 space-y-6">
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-cyan-800 pb-4">
+          <div className="flex items-center gap-2">
+            <Calculator className="w-6 h-6 text-amber-400" />
+            <h3 className="text-xl md:text-2xl font-black text-white">
+              AUTOMATIC CALCULATION PANEL
             </h3>
-            <p className="text-xs text-slate-500 font-semibold mt-0.5">
-              Click any container below to select, fill, and pour water into the measuring jug!
-            </p>
           </div>
-          <span className="text-xs font-extrabold text-cyan-700 bg-cyan-50 px-3 py-1.5 rounded-full border border-cyan-200">
-            Exactly 10 Distinct Capacities
+          <span className="px-3 py-1 bg-cyan-900 text-cyan-300 rounded-full text-xs font-bold border border-cyan-700 shrink-0">
+            Live Synchronized Conversion
           </span>
         </div>
 
-        {/* 10 Containers Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 md:grid-cols-10 gap-3">
-          {containers.map((c) => {
-            const isSelected = selectedContainerId === c.id;
-            const isPouring = pouringContainerId === c.id;
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* 1. Total Volume in mL */}
+          <div className="bg-slate-800/90 border border-slate-700 p-5 rounded-2xl space-y-2 flex flex-col justify-between">
+            <span className="text-xs font-bold uppercase text-cyan-300 block">
+              1. Total Volume in Millilitres (mL):
+            </span>
+            <p className="font-mono text-base md:text-lg font-bold text-white bg-slate-900 p-3 rounded-xl border border-slate-700 break-all">
+              {additionString}
+            </p>
+          </div>
 
-            return (
-              <div
-                key={c.id}
-                onClick={() => setSelectedContainerId(c.id)}
-                className={`p-3 rounded-2xl border-2 cursor-pointer transition-all flex flex-col items-center justify-between space-y-2 ${
-                  isSelected
-                    ? 'bg-cyan-50 border-cyan-500 shadow-md scale-105'
-                    : 'bg-slate-50/80 border-slate-200 hover:border-cyan-300'
-                }`}
-              >
-                <span className="text-[10px] font-black uppercase text-slate-500">
-                  #{c.id}
-                </span>
+          {/* 2. Conversion Operation */}
+          <div className="bg-slate-800/90 border border-slate-700 p-5 rounded-2xl space-y-2 flex flex-col justify-between">
+            <span className="text-xs font-bold uppercase text-emerald-300 block">
+              2. Conversion Operation (mL ÷ 1,000 = L):
+            </span>
+            <p className="font-mono text-base md:text-lg font-bold text-emerald-300 bg-slate-900 p-3 rounded-xl border border-slate-700">
+              {divisionString}
+            </p>
+          </div>
 
-                {/* Container Visual SVG with height scaled by capacity */}
-                <div className={`relative w-10 h-20 flex items-end justify-center ${isPouring ? 'animate-bounce' : ''}`}>
-                  <svg viewBox="0 0 40 80" className="w-full h-full drop-shadow-xs">
-                    {/* Glass Container Outer Body */}
-                    <path
-                      d="M 5,10 L 35,10 L 32,72 C 32,75 29,77 25,77 L 15,77 C 11,77 8,75 8,72 Z"
-                      fill="rgba(255, 255, 255, 0.7)"
-                      stroke="#0284c7"
-                      strokeWidth="2"
-                    />
-
-                    {/* Scale Markings depending on capacity */}
-                    <line x1="8" y1={75 - (c.capacity / 100) * 60} x2="18" y2={75 - (c.capacity / 100) * 60} stroke="#0369a1" strokeWidth="2" />
-
-                    {/* Water Fill */}
-                    {c.isFull && (
-                      <path
-                        d={`M 6,${75 - (c.capacity / 100) * 60} L 34,${75 - (c.capacity / 100) * 60} L 31,71 C 31,73 28,75 24,75 L 16,75 C 12,75 9,73 9,71 Z`}
-                        fill="#38bdf8"
-                        opacity="0.9"
-                      />
-                    )}
-                  </svg>
-                </div>
-
-                <div className="text-center space-y-0.5 w-full">
-                  <span className="text-xs font-black text-slate-800 block">
-                    {c.capacity} mL
-                  </span>
-                  <span className="text-[9px] font-extrabold text-slate-400 block">
-                    ({(c.capacity / 1000).toFixed(2)} L)
-                  </span>
-                </div>
-
-                {/* Individual Action Buttons */}
-                {!c.isFull ? (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedContainerId(c.id);
-                      fillContainer(c.id);
-                    }}
-                    className="w-full py-1 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white font-black text-[10px] transition-colors"
-                  >
-                    Fill
-                  </button>
-                ) : (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedContainerId(c.id);
-                      pourContainer(c.id);
-                    }}
-                    disabled={jugVolume >= JUG_CAPACITY}
-                    className="w-full py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] transition-colors disabled:opacity-40"
-                  >
-                    Pour
-                  </button>
-                )}
-              </div>
-            );
-          })}
+          {/* 3. Final Result */}
+          <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-5 rounded-2xl text-slate-950 space-y-1 shadow-md flex flex-col justify-between">
+            <span className="text-xs font-black uppercase tracking-wider block opacity-90">
+              3. Final Statement:
+            </span>
+            <p className="text-2xl md:text-3xl font-black">
+              {finalStatement}
+            </p>
+          </div>
         </div>
 
-        <div className="bg-cyan-50 border border-cyan-200 p-4 rounded-2xl text-xs text-cyan-900 space-y-1">
-          <p className="font-bold flex items-center gap-1">
-            <Info className="w-4 h-4 text-cyan-600" />
-            Educational Goal:
-          </p>
-          <p>
-            Observe how different container amounts (e.g. 10 mL = 0.01 L, 50 mL = 0.05 L, 100 mL = 0.1 L) convert directly to decimal litres when poured into the jug!
-          </p>
+        {/* Educational Note */}
+        <div className="bg-cyan-950/80 border border-cyan-800 p-4 rounded-2xl text-cyan-200 text-xs md:text-sm font-medium flex items-center gap-3">
+          <Info className="w-5 h-5 text-amber-400 shrink-0" />
+          <span>
+            Notice how pouring water automatically accumulates millilitres and converts directly into litres using <strong>mL ÷ 1,000 = L</strong>!
+          </span>
         </div>
+
       </div>
     </div>
   );
