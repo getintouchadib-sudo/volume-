@@ -98,7 +98,7 @@ export const Learn: React.FC = () => {
 
               <div className="bg-white/90 p-3.5 rounded-xl border border-blue-200 text-xs md:text-sm font-mono space-y-1">
                 <p className="font-bold text-slate-800">Example:</p>
-                <p className="text-blue-900 font-bold">0.3 L = 0.3 × 1,000 mL = 300 mL</p>
+                <p className="text-blue-900 font-bold">2.8 L = 2.8 × 1,000 mL = 2,800 mL</p>
               </div>
 
               <p className="text-xs md:text-sm text-slate-700 leading-relaxed font-medium">
@@ -123,7 +123,7 @@ export const Learn: React.FC = () => {
 
               <div className="bg-white/90 p-3.5 rounded-xl border border-teal-200 text-xs md:text-sm font-mono space-y-1">
                 <p className="font-bold text-slate-800">Example:</p>
-                <p className="text-emerald-900 font-bold">500 mL = 500 ÷ 1,000 L = 0.5 L</p>
+                <p className="text-emerald-900 font-bold">7,000 mL = 7,000 ÷ 1,000 L = 7 L</p>
               </div>
 
               <p className="text-xs md:text-sm text-slate-700 leading-relaxed font-medium">
@@ -201,10 +201,10 @@ export const Learn: React.FC = () => {
         },
         {
           id: 'q-a2',
-          question: 'If a measuring jug contains 500 mL of water, what fraction of 1 litre is in the jug?',
-          options: ['1/4 L', '1/2 L', '3/4 L', '1 L'],
+          question: 'If a water tank contains 7,000 mL of liquid, how many litres (L) is that?',
+          options: ['0.7 L', '7 L', '70 L', '700 L'],
           correctIndex: 1,
-          explanation: '500 mL is half of 1,000 mL (500/1,000 = 1/2). Therefore, 500 mL = 1/2 L.'
+          explanation: 'To convert mL to L, divide by 1,000: 7,000 mL ÷ 1,000 = 7 L.'
         }
       ]
     },
@@ -232,13 +232,13 @@ export const Learn: React.FC = () => {
               <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-bold">
                 Worked Example 1
               </span>
-              <span className="text-xs font-bold text-slate-400">Convert 0.3 L to mL</span>
+              <span className="text-xs font-bold text-slate-400">Convert 2.8 L to mL</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
               <div className="space-y-3">
                 <p className="text-base font-bold text-slate-800">
-                  Convert <span className="text-blue-600">0.3 L</span> to millilitres (mL).
+                  Convert <span className="text-blue-600">2.8 L</span> to millilitres (mL).
                 </p>
 
                 <button
@@ -253,30 +253,30 @@ export const Learn: React.FC = () => {
                   <div className="bg-cyan-50 border border-cyan-200 rounded-xl p-4 space-y-2 text-sm text-slate-700 animate-fadeIn">
                     <p><strong className="text-cyan-800">Step 1:</strong> Write the conversion statement.</p>
                     <p className="font-mono bg-white p-2 rounded-lg border border-cyan-200 text-cyan-900 font-bold">
-                      0.3 L = 0.3 × 1,000 mL
+                      2.8 L = 2.8 × 1,000 mL
                     </p>
                     <p><strong className="text-cyan-800">Step 2:</strong> Calculate by moving the decimal point 3 places right.</p>
                     <p className="font-mono bg-white p-2 rounded-lg border border-cyan-200 text-cyan-900 font-bold">
-                      0.3 × 1,000 = 300 mL
+                      2.8 × 1,000 = 2,800 mL
                     </p>
                     <p className="text-emerald-700 font-black text-base pt-1">
-                      Answer: 0.3 L = 300 mL
+                      Answer: 2.8 L = 2,800 mL
                     </p>
                   </div>
                 )}
               </div>
 
-              {/* Jug Illustration showing 300 mL */}
+              {/* Jug Illustration showing 2,800 mL */}
               <div className="flex flex-col items-center bg-slate-50 p-4 rounded-2xl border border-slate-200">
                 <svg viewBox="0 0 100 120" className="w-24 h-32 drop-shadow-md">
                   <path d="M 20,20 L 80,20 L 75,110 L 25,110 Z" fill="#e0f2fe" stroke="#0284c7" strokeWidth="3" />
                   <path d="M 77,30 C 92,30 92,70 75,75" fill="none" stroke="#0284c7" strokeWidth="4" strokeLinecap="round" />
-                  {/* Water fill 30% */}
-                  <rect x="25" y="83" width="50" height="25" fill="#38bdf8" opacity="0.85" />
-                  <line x1="25" y1="83" x2="35" y2="83" stroke="#0369a1" strokeWidth="2" />
-                  <text x="38" y="86" fontSize="8" fontWeight="bold" fill="#0369a1">300 mL (0.3 L)</text>
+                  {/* Water fill 80% */}
+                  <rect x="25" y="38" width="50" height="70" fill="#38bdf8" opacity="0.85" />
+                  <line x1="25" y1="38" x2="35" y2="38" stroke="#0369a1" strokeWidth="2" />
+                  <text x="38" y="41" fontSize="7" fontWeight="bold" fill="#0369a1">2,800 mL (2.8 L)</text>
                 </svg>
-                <span className="text-xs font-bold text-slate-600 mt-2">Visual Jug: 300 mL level</span>
+                <span className="text-xs font-bold text-slate-600 mt-2">Visual Jug: 2.8 L (2,800 mL)</span>
               </div>
             </div>
           </div>
@@ -287,12 +287,12 @@ export const Learn: React.FC = () => {
               <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-bold">
                 Worked Example 2
               </span>
-              <span className="text-xs font-bold text-slate-400">Convert 1.25 L to mL</span>
+              <span className="text-xs font-bold text-slate-400">Convert 12.4 L to mL</span>
             </div>
 
             <div className="space-y-3">
               <p className="text-base font-bold text-slate-800">
-                Convert <span className="text-blue-600">1.25 L</span> to millilitres (mL).
+                Convert <span className="text-blue-600">12.4 L</span> to millilitres (mL).
               </p>
 
               <button
@@ -305,13 +305,13 @@ export const Learn: React.FC = () => {
 
               {revealedSteps['ex-b2'] && (
                 <div className="bg-cyan-50 border border-cyan-200 rounded-xl p-4 space-y-2 text-sm text-slate-700">
-                  <p><strong className="text-cyan-800">Step 1:</strong> Multiply 1.25 by 1,000.</p>
+                  <p><strong className="text-cyan-800">Step 1:</strong> Multiply 12.4 by 1,000.</p>
                   <p className="font-mono bg-white p-2 rounded-lg border border-cyan-200 text-cyan-900 font-bold">
-                    1.25 L = 1.25 × 1,000 mL
+                    12.4 L = 12.4 × 1,000 mL
                   </p>
-                  <p><strong className="text-cyan-800">Step 2:</strong> 1.25 × 1,000 = 1,250</p>
+                  <p><strong className="text-cyan-800">Step 2:</strong> 12.4 × 1,000 = 12,400</p>
                   <p className="text-emerald-700 font-black text-base pt-1">
-                    Answer: 1.25 L = 1,250 mL
+                    Answer: 12.4 L = 12,400 mL
                   </p>
                 </div>
               )}
@@ -322,17 +322,17 @@ export const Learn: React.FC = () => {
       practiceQuestions: [
         {
           id: 'q-b1',
-          question: 'Convert 0.7 L to millilitres (mL).',
-          options: ['7 mL', '70 mL', '700 mL', '7,000 mL'],
+          question: 'Convert 3.5 L to millilitres (mL).',
+          options: ['35 mL', '350 mL', '3,500 mL', '35,000 mL'],
           correctIndex: 2,
-          explanation: 'To convert litres to millilitres, multiply by 1,000: 0.7 × 1,000 = 700 mL.'
+          explanation: 'To convert litres to millilitres, multiply by 1,000: 3.5 × 1,000 = 3,500 mL.'
         },
         {
           id: 'q-b2',
-          question: 'Convert 2.5 L to millilitres (mL).',
-          options: ['250 mL', '2,500 mL', '25,000 mL', '25 mL'],
-          correctIndex: 1,
-          explanation: 'Multiply 2.5 by 1,000: 2.5 × 1,000 = 2,500 mL.'
+          question: 'Convert 11.2 L to millilitres (mL).',
+          options: ['112 mL', '1,120 mL', '11,200 mL', '112,000 mL'],
+          correctIndex: 2,
+          explanation: 'Multiply 11.2 by 1,000: 11.2 × 1,000 = 11,200 mL.'
         }
       ]
     },
@@ -355,13 +355,13 @@ export const Learn: React.FC = () => {
               <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-bold">
                 Worked Example 1
               </span>
-              <span className="text-xs font-bold text-slate-400">Convert 1/2 L to mL</span>
+              <span className="text-xs font-bold text-slate-400">Convert 3 1/2 L to mL</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
               <div className="space-y-3">
                 <p className="text-base font-bold text-slate-800">
-                  Convert <span className="text-purple-600 font-extrabold">1/2 L</span> to millilitres (mL).
+                  Convert <span className="text-purple-600 font-extrabold">3 1/2 L</span> to millilitres (mL).
                 </p>
 
                 <button
@@ -374,13 +374,13 @@ export const Learn: React.FC = () => {
 
                 {revealedSteps['ex-c1'] && (
                   <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 space-y-2 text-sm text-slate-700">
-                    <p><strong className="text-purple-900">Step 1:</strong> Multiply fraction by 1,000 mL.</p>
+                    <p><strong className="text-purple-900">Step 1:</strong> Convert whole part and fraction part to mL.</p>
                     <p className="font-mono bg-white p-2 rounded-lg border border-purple-200 text-purple-900 font-bold">
-                      1/2 L = 1/2 × 1,000 mL
+                      3 L = 3,000 mL &nbsp;|&nbsp; 1/2 L = 500 mL
                     </p>
-                    <p><strong className="text-purple-900">Step 2:</strong> 1,000 ÷ 2 = 500 mL</p>
+                    <p><strong className="text-purple-900">Step 2:</strong> Add them together: 3,000 + 500 = 3,500 mL.</p>
                     <p className="text-emerald-700 font-black text-base pt-1">
-                      Answer: 1/2 L = 500 mL
+                      Answer: 3 1/2 L = 3,500 mL
                     </p>
                   </div>
                 )}
@@ -388,13 +388,13 @@ export const Learn: React.FC = () => {
 
               {/* Visual Fraction Bar */}
               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
-                <span className="text-xs font-bold text-slate-600 block text-center">Visual Fraction Bar (1 L = 1,000 mL)</span>
+                <span className="text-xs font-bold text-slate-600 block text-center">Visual Breakdown (3 1/2 L)</span>
                 <div className="h-10 w-full bg-slate-200 rounded-xl overflow-hidden flex border border-slate-300">
-                  <div className="w-1/2 bg-purple-500 text-white text-xs font-bold flex items-center justify-center border-r border-white">
-                    1/2 L (500 mL)
+                  <div className="w-3/4 bg-purple-600 text-white text-xs font-bold flex items-center justify-center border-r border-white">
+                    3 L (3,000 mL)
                   </div>
-                  <div className="w-1/2 bg-slate-300 text-slate-600 text-xs font-medium flex items-center justify-center">
-                    500 mL
+                  <div className="w-1/4 bg-purple-400 text-white text-xs font-bold flex items-center justify-center">
+                    1/2 L (500 mL)
                   </div>
                 </div>
               </div>
@@ -407,13 +407,13 @@ export const Learn: React.FC = () => {
               <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-bold">
                 Worked Example 2
               </span>
-              <span className="text-xs font-bold text-slate-400">Convert 3/4 L to mL</span>
+              <span className="text-xs font-bold text-slate-400">Convert 7 3/4 L to mL</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
               <div className="space-y-3">
                 <p className="text-base font-bold text-slate-800">
-                  Convert <span className="text-purple-600 font-extrabold">3/4 L</span> to millilitres (mL).
+                  Convert <span className="text-purple-600 font-extrabold">7 3/4 L</span> to millilitres (mL).
                 </p>
 
                 <button
@@ -426,27 +426,27 @@ export const Learn: React.FC = () => {
 
                 {revealedSteps['ex-c2'] && (
                   <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 space-y-2 text-sm text-slate-700">
-                    <p><strong className="text-purple-900">Step 1:</strong> Multiply 3/4 by 1,000 mL.</p>
+                    <p><strong className="text-purple-900">Step 1:</strong> Convert whole part and fraction part to mL.</p>
                     <p className="font-mono bg-white p-2 rounded-lg border border-purple-200 text-purple-900 font-bold">
-                      3/4 L = 3/4 × 1,000 mL
+                      7 L = 7,000 mL &nbsp;|&nbsp; 3/4 L = 750 mL
                     </p>
-                    <p><strong className="text-purple-900">Step 2:</strong> (3 × 1,000) ÷ 4 = 3,000 ÷ 4 = 750 mL</p>
+                    <p><strong className="text-purple-900">Step 2:</strong> 7,000 + 750 = 7,750 mL</p>
                     <p className="text-emerald-700 font-black text-base pt-1">
-                      Answer: 3/4 L = 750 mL
+                      Answer: 7 3/4 L = 7,750 mL
                     </p>
                   </div>
                 )}
               </div>
 
-              {/* Visual Fraction Bar 3/4 */}
+              {/* Visual Fraction Bar 7 3/4 */}
               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
-                <span className="text-xs font-bold text-slate-600 block text-center">Visual Fraction Bar (3/4 of 1,000 mL)</span>
+                <span className="text-xs font-bold text-slate-600 block text-center">Visual Breakdown (7 3/4 L)</span>
                 <div className="h-10 w-full bg-slate-200 rounded-xl overflow-hidden flex border border-slate-300">
-                  <div className="w-3/4 bg-purple-600 text-white text-xs font-bold flex items-center justify-center border-r border-white">
-                    3/4 L = 750 mL
+                  <div className="w-4/5 bg-purple-600 text-white text-xs font-bold flex items-center justify-center border-r border-white">
+                    7 L = 7,000 mL
                   </div>
-                  <div className="w-1/4 bg-slate-300 text-slate-600 text-xs font-medium flex items-center justify-center">
-                    250 mL
+                  <div className="w-1/5 bg-purple-400 text-white text-xs font-bold flex items-center justify-center">
+                    3/4 L = 750 mL
                   </div>
                 </div>
               </div>
@@ -457,17 +457,17 @@ export const Learn: React.FC = () => {
       practiceQuestions: [
         {
           id: 'q-c1',
-          question: 'Convert 1/4 L to millilitres (mL).',
-          options: ['100 mL', '250 mL', '400 mL', '500 mL'],
-          correctIndex: 1,
-          explanation: '1/4 L = 1/4 × 1,000 mL = 1,000 ÷ 4 = 250 mL.'
+          question: 'Convert 5 1/2 L to millilitres (mL).',
+          options: ['5,120 mL', '5,250 mL', '5,500 mL', '5,750 mL'],
+          correctIndex: 2,
+          explanation: '5 L = 5,000 mL and 1/2 L = 500 mL. Total = 5,000 + 500 = 5,500 mL.'
         },
         {
           id: 'q-c2',
-          question: 'Convert 1 1/2 L to millilitres (mL).',
-          options: ['1,200 mL', '1,500 mL', '1,750 mL', '2,000 mL'],
+          question: 'Convert 11 1/4 L to millilitres (mL).',
+          options: ['11,100 mL', '11,250 mL', '11,400 mL', '11,500 mL'],
           correctIndex: 1,
-          explanation: '1 L = 1,000 mL and 1/2 L = 500 mL. Total = 1,000 + 500 = 1,500 mL.'
+          explanation: '11 L = 11,000 mL and 1/4 L = 250 mL. Total = 11,000 + 250 = 11,250 mL.'
         }
       ]
     },
@@ -495,12 +495,12 @@ export const Learn: React.FC = () => {
               <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold">
                 Worked Example 1
               </span>
-              <span className="text-xs font-bold text-slate-400">Convert 2,750 mL to L</span>
+              <span className="text-xs font-bold text-slate-400">Convert 7,200 mL to L</span>
             </div>
 
             <div className="space-y-3">
               <p className="text-base font-bold text-slate-800">
-                Convert <span className="text-emerald-600 font-extrabold">2,750 mL</span> to litres (L).
+                Convert <span className="text-emerald-600 font-extrabold">7,200 mL</span> to litres (L).
               </p>
 
               <button
@@ -513,18 +513,18 @@ export const Learn: React.FC = () => {
 
               {revealedSteps['ex-d1'] && (
                 <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 space-y-3 text-sm text-slate-700">
-                  <p><strong className="text-emerald-900">Step 1:</strong> Divide 2,750 by 1,000.</p>
+                  <p><strong className="text-emerald-900">Step 1:</strong> Divide 7,200 by 1,000.</p>
                   <p className="font-mono bg-white p-2 rounded-lg border border-emerald-200 text-emerald-900 font-bold">
-                    2,750 mL = 2,750 ÷ 1,000 L
+                    7,200 mL = 7,200 ÷ 1,000 L
                   </p>
-                  <p><strong className="text-emerald-900">Step 2:</strong> 2,750 ÷ 1,000 = 2.75 L</p>
+                  <p><strong className="text-emerald-900">Step 2:</strong> 7,200 ÷ 1,000 = 7.2 L</p>
                   <div className="p-3 bg-white rounded-xl border border-emerald-200 text-slate-700 text-xs font-medium space-y-1">
                     <p className="font-bold text-slate-900">Visual Breakdown:</p>
-                    <p>2,750 mL = 2,000 mL + 750 mL</p>
-                    <p>2,000 mL = 2 L and 750 mL = 0.75 L → Total = 2.75 L</p>
+                    <p>7,200 mL = 7,000 mL + 200 mL</p>
+                    <p>7,000 mL = 7 L and 200 mL = 0.2 L → Total = 7.2 L</p>
                   </div>
                   <p className="text-emerald-700 font-black text-base pt-1">
-                    Answer: 2,750 mL = 2.75 L
+                    Answer: 7,200 mL = 7.2 L
                   </p>
                 </div>
               )}
@@ -537,12 +537,12 @@ export const Learn: React.FC = () => {
               <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold">
                 Worked Example 2
               </span>
-              <span className="text-xs font-bold text-slate-400">Convert 700 mL to L</span>
+              <span className="text-xs font-bold text-slate-400">Convert 14,500 mL to L</span>
             </div>
 
             <div className="space-y-3">
               <p className="text-base font-bold text-slate-800">
-                Convert <span className="text-emerald-600 font-extrabold">700 mL</span> to litres (L).
+                Convert <span className="text-emerald-600 font-extrabold">14,500 mL</span> to litres (L).
               </p>
 
               <button
@@ -555,12 +555,12 @@ export const Learn: React.FC = () => {
 
               {revealedSteps['ex-d2'] && (
                 <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 space-y-2 text-sm text-slate-700">
-                  <p><strong className="text-emerald-900">Step 1:</strong> Divide 700 by 1,000.</p>
+                  <p><strong className="text-emerald-900">Step 1:</strong> Divide 14,500 by 1,000.</p>
                   <p className="font-mono bg-white p-2 rounded-lg border border-emerald-200 text-emerald-900 font-bold">
-                    700 mL ÷ 1,000 = 0.7 L
+                    14,500 mL ÷ 1,000 = 14.5 L
                   </p>
                   <p className="text-emerald-700 font-black text-base pt-1">
-                    Answer: 700 mL = 0.7 L
+                    Answer: 14,500 mL = 14.5 L
                   </p>
                 </div>
               )}
@@ -571,17 +571,17 @@ export const Learn: React.FC = () => {
       practiceQuestions: [
         {
           id: 'q-d1',
-          question: 'Convert 1,400 mL to litres in decimal form.',
-          options: ['0.14 L', '1.4 L', '14 L', '140 L'],
+          question: 'Convert 10,800 mL to litres in decimal form.',
+          options: ['1.08 L', '10.8 L', '108 L', '1,080 L'],
           correctIndex: 1,
-          explanation: 'Divide by 1,000: 1,400 ÷ 1,000 = 1.4 L.'
+          explanation: 'Divide by 1,000: 10,800 ÷ 1,000 = 10.8 L.'
         },
         {
           id: 'q-d2',
-          question: 'Convert 80 mL to litres in decimal form.',
-          options: ['0.08 L', '0.8 L', '8.0 L', '80.0 L'],
+          question: 'Convert 4,250 mL to litres in decimal form.',
+          options: ['4.25 L', '42.5 L', '0.425 L', '425 L'],
           correctIndex: 0,
-          explanation: 'Divide by 1,000: 80 ÷ 1,000 = 0.08 L.'
+          explanation: 'Divide by 1,000: 4,250 ÷ 1,000 = 4.25 L.'
         }
       ]
     },
@@ -604,12 +604,12 @@ export const Learn: React.FC = () => {
               <span className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-bold">
                 Worked Example 1
               </span>
-              <span className="text-xs font-bold text-slate-400">Convert 750 mL to fraction L</span>
+              <span className="text-xs font-bold text-slate-400">Convert 11,500 mL to mixed fraction L</span>
             </div>
 
             <div className="space-y-3">
               <p className="text-base font-bold text-slate-800">
-                Convert <span className="text-amber-600 font-extrabold">750 mL</span> to a fraction of a litre.
+                Convert <span className="text-amber-600 font-extrabold">11,500 mL</span> to a mixed fraction of a litre.
               </p>
 
               <button
@@ -622,16 +622,13 @@ export const Learn: React.FC = () => {
 
               {revealedSteps['ex-e1'] && (
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2 text-sm text-slate-700">
-                  <p><strong className="text-amber-900">Step 1:</strong> Write as a fraction over 1,000.</p>
+                  <p><strong className="text-amber-900">Step 1:</strong> Separate whole thousands: 11,000 mL = 11 L.</p>
+                  <p><strong className="text-amber-900">Step 2:</strong> Express remaining 500 mL as fraction: 500/1,000 L = 1/2 L.</p>
                   <p className="font-mono bg-white p-2 rounded-lg border border-amber-200 text-amber-900 font-bold">
-                    750/1,000 L
-                  </p>
-                  <p><strong className="text-amber-900">Step 2:</strong> Simplify by dividing top and bottom by 250.</p>
-                  <p className="font-mono bg-white p-2 rounded-lg border border-amber-200 text-amber-900 font-bold">
-                    (750 ÷ 250) / (1,000 ÷ 250) = 3/4 L
+                    11,000 mL + 500 mL = 11 L + 1/2 L = 11 1/2 L
                   </p>
                   <p className="text-emerald-700 font-black text-base pt-1">
-                    Answer: 750 mL = 3/4 L
+                    Answer: 11,500 mL = 11 1/2 L
                   </p>
                 </div>
               )}
@@ -644,12 +641,12 @@ export const Learn: React.FC = () => {
               <span className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-bold">
                 Worked Example 2
               </span>
-              <span className="text-xs font-bold text-slate-400">Convert 250 mL to fraction L</span>
+              <span className="text-xs font-bold text-slate-400">Convert 14,250 mL to mixed fraction L</span>
             </div>
 
             <div className="space-y-3">
               <p className="text-base font-bold text-slate-800">
-                Convert <span className="text-amber-600 font-extrabold">250 mL</span> to a fraction of a litre.
+                Convert <span className="text-amber-600 font-extrabold">14,250 mL</span> to a mixed fraction of a litre.
               </p>
 
               <button
@@ -662,13 +659,13 @@ export const Learn: React.FC = () => {
 
               {revealedSteps['ex-e2'] && (
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2 text-sm text-slate-700">
-                  <p><strong className="text-amber-900">Step 1:</strong> Write as fraction 250/1,000 L.</p>
-                  <p><strong className="text-amber-900">Step 2:</strong> Simplify by dividing by 250.</p>
+                  <p><strong className="text-amber-900">Step 1:</strong> Separate whole thousands: 14,000 mL = 14 L.</p>
+                  <p><strong className="text-amber-900">Step 2:</strong> Express 250 mL as simplified fraction: 250/1,000 = 1/4 L.</p>
                   <p className="font-mono bg-white p-2 rounded-lg border border-amber-200 text-amber-900 font-bold">
-                    250/1,000 = 1/4 L
+                    14 L + 1/4 L = 14 1/4 L
                   </p>
                   <p className="text-emerald-700 font-black text-base pt-1">
-                    Answer: 250 mL = 1/4 L
+                    Answer: 14,250 mL = 14 1/4 L
                   </p>
                 </div>
               )}
@@ -679,17 +676,17 @@ export const Learn: React.FC = () => {
       practiceQuestions: [
         {
           id: 'q-e1',
-          question: 'Convert 500 mL to a simplified fraction of a litre.',
-          options: ['1/5 L', '1/4 L', '1/2 L', '3/5 L'],
-          correctIndex: 2,
-          explanation: '500/1,000 simplified by dividing both numerator and denominator by 500 gives 1/2 L.'
+          question: 'Convert 8,500 mL to a simplified mixed fraction of a litre.',
+          options: ['8 1/4 L', '8 1/2 L', '8 3/4 L', '8 1/5 L'],
+          correctIndex: 1,
+          explanation: '8,000 mL = 8 L and 500 mL = 1/2 L. Total = 8 1/2 L.'
         },
         {
           id: 'q-e2',
-          question: 'Convert 200 mL to a simplified fraction of a litre.',
-          options: ['1/5 L', '2/5 L', '1/4 L', '1/10 L'],
-          correctIndex: 0,
-          explanation: '200/1,000 simplified by dividing numerator and denominator by 200 gives 1/5 L.'
+          question: 'Convert 13,750 mL to a simplified mixed fraction of a litre.',
+          options: ['13 1/4 L', '13 1/2 L', '13 3/4 L', '13 4/5 L'],
+          correctIndex: 2,
+          explanation: '13,000 mL = 13 L and 750 mL = 3/4 L. Total = 13 3/4 L.'
         }
       ]
     }
