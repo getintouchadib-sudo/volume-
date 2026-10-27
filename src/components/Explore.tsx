@@ -15,8 +15,8 @@ interface ContainerData {
 }
 
 export const Explore: React.FC = () => {
-  // 10 containers with capacities: 10, 30, 50, 10, 100, 200, 300, 400, 500, 100 mL
-  const containerCapacities = [10, 30, 50, 10, 100, 200, 300, 400, 500, 100];
+  // 10 containers with capacities: 10, 30, 50, 10, 100, 200, 300, 400, 500, 1000 mL (Container 10 = 1,000 mL)
+  const containerCapacities = [10, 30, 50, 10, 100, 200, 300, 400, 500, 1000];
   const containers: ContainerData[] = containerCapacities.map((cap, i) => ({
     id: i + 1,
     capacity: cap
@@ -99,11 +99,11 @@ export const Explore: React.FC = () => {
 
   // Dynamic Calculation Panel Strings
   const additionString = pouredHistory.length > 0
-    ? `${pouredHistory.map(v => `${v} mL`).join(' + ')} = ${jugVolume} mL`
+    ? `${pouredHistory.map(v => `${v.toLocaleString('en-US')} mL`).join(' + ')} = ${jugVolume.toLocaleString('en-US')} mL`
     : '0 mL';
 
-  const divisionString = `${jugVolume} ÷ 1,000 = ${formattedL}`;
-  const finalStatement = `${jugVolume} mL = ${formattedL}`;
+  const divisionString = `${jugVolume.toLocaleString('en-US')} ÷ 1,000 = ${formattedL}`;
+  const finalStatement = `${jugVolume.toLocaleString('en-US')} mL = ${formattedL}`;
 
   return (
     <div className="space-y-8">
@@ -142,7 +142,7 @@ export const Explore: React.FC = () => {
         <div className="flex items-center gap-2">
           <Droplets className="w-5 h-5 text-cyan-600" />
           <span className="font-extrabold text-slate-800 text-sm md:text-base">
-            Measuring Experiment Status: {jugVolume} mL ({formattedL})
+            Measuring Experiment Status: {jugVolume.toLocaleString('en-US')} mL ({formattedL})
           </span>
         </div>
 
@@ -244,7 +244,7 @@ export const Explore: React.FC = () => {
                         fontWeight="bold"
                         fill="#0369a1"
                       >
-                        {lVal} L ({mLVal} mL)
+                        {lVal} L ({mLVal.toLocaleString('en-US')} mL)
                       </text>
                     )}
                   </g>
@@ -263,7 +263,7 @@ export const Explore: React.FC = () => {
               Current Liquid Volume
             </span>
             <p className="text-2xl font-black text-slate-900">
-              {jugVolume} mL / 15,000 mL ({formattedL})
+              {jugVolume.toLocaleString('en-US')} mL / 15,000 mL ({formattedL})
             </p>
           </div>
         </div>
@@ -281,7 +281,7 @@ export const Explore: React.FC = () => {
                 </p>
               </div>
               <span className="text-xs font-extrabold text-cyan-700 bg-cyan-50 px-3 py-1 rounded-full border border-cyan-200 shrink-0">
-                {totalSelectedUnits} Selection{totalSelectedUnits !== 1 ? 's' : ''} ({pendingVolume} mL Pending)
+                {totalSelectedUnits} Selection{totalSelectedUnits !== 1 ? 's' : ''} ({pendingVolume.toLocaleString('en-US')} mL Pending)
               </span>
             </div>
 
@@ -290,8 +290,8 @@ export const Explore: React.FC = () => {
               {containers.map((c) => {
                 const count = selectedCounts[c.id] || 0;
                 const isSelected = count > 0;
-                // Calculate visual liquid height in glass SVG (scaled from 10 mL to 500 mL)
-                const fillRatio = 0.15 + (c.capacity / 500) * 0.75;
+                // Calculate visual liquid height in glass SVG (scaled relative to 1000 mL max)
+                const fillRatio = 0.15 + Math.min(1, c.capacity / 1000) * 0.75;
                 const waterY = 75 - fillRatio * 55;
 
                 return (
@@ -335,7 +335,7 @@ export const Explore: React.FC = () => {
 
                     <div className="text-center w-full">
                       <span className="text-xs font-black text-slate-800 block">
-                        {c.capacity} mL
+                        {c.capacity.toLocaleString('en-US')} mL
                       </span>
                     </div>
                   </div>
@@ -363,7 +363,7 @@ export const Explore: React.FC = () => {
                   ? 'Jug is Full (15,000 mL Max Capacity)'
                   : pendingVolume === 0
                   ? 'Select Containers Above to Pour'
-                  : `Fill & Pour Selected Containers (${pendingVolume} mL) into Jug`}
+                  : `Fill & Pour Selected Containers (${pendingVolume.toLocaleString('en-US')} mL) into Jug`}
               </span>
             </button>
           </div>
