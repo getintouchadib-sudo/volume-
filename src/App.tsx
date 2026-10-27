@@ -7,7 +7,6 @@ import { Learn } from './components/Learn';
 import { Watch } from './components/Watch';
 import { Explore } from './components/Explore';
 import { Game } from './components/Game';
-import { Assessment } from './components/Assessment';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<TabType>('home');
@@ -27,7 +26,6 @@ export function App() {
 
         {activeTab === 'explore' && <Explore />}
         {activeTab === 'game' && <Game />}
-        {activeTab === 'assessment' && <Assessment />}
       </main>
 
       <Footer setActiveTab={setActiveTab} />

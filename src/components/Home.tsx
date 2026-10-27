@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, Tv, FlaskConical, Gamepad2, ArrowRight, Award, Sparkles } from 'lucide-react';
+import { BookOpen, Tv, FlaskConical, Gamepad2, ArrowRight, Sparkles } from 'lucide-react';
 import type { TabType } from './Header';
 import { Mascot } from './Mascot';
 
@@ -192,30 +192,6 @@ export const Home: React.FC<HomeProps> = ({ setActiveTab }) => {
         </div>
       </section>
 
-      {/* Assessment Shortcut Banner */}
-      <section className="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 rounded-3xl p-6 md:p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
-        <div className="space-y-2 text-center md:text-left">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-800/60 text-purple-200 text-xs font-bold">
-            <Award className="w-4 h-4 text-amber-400" />
-            Educational Evaluation
-          </div>
-          <h3 className="text-2xl font-black text-white">
-            Ready to Test Your Knowledge?
-          </h3>
-          <p className="text-purple-200 text-sm max-w-xl">
-            Take our interactive Assessment quiz! Perform a Pre-Test before learning and a Post-Test after exploring to measure your improvement in converting L and mL!
-          </p>
-        </div>
-
-        <button
-          onClick={() => setActiveTab('assessment')}
-          className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white font-black text-sm flex items-center gap-2 shadow-lg hover:shadow-purple-500/25 shrink-0 transform hover:scale-105 transition-all"
-        >
-          <Award className="w-5 h-5 text-amber-300" />
-          <span>Start Assessment Quiz</span>
-          <ArrowRight className="w-4 h-4" />
-        </button>
-      </section>
     </div>
   );
 };

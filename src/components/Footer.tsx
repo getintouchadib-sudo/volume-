@@ -84,15 +84,6 @@ export const Footer: React.FC<FooterProps> = ({ setActiveTab }) => {
                   GAME — Match, Missing Value, Misconception
                 </button>
               </li>
-              <li>
-                <button
-                  onClick={() => setActiveTab('assessment')}
-                  className="hover:text-cyan-400 transition-colors flex items-center gap-2"
-                >
-                  <span className="w-2 h-2 rounded-full bg-purple-500" />
-                  ASSESSMENT — Pre & Post Test
-                </button>
-              </li>
             </ul>
           </div>
 

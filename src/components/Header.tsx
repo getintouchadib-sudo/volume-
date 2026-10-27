@@ -1,7 +1,7 @@
 import React from 'react';
-import { BookOpen, Tv, FlaskConical, Gamepad2, Award, Home, Droplets } from 'lucide-react';
+import { BookOpen, Tv, FlaskConical, Gamepad2, Home, Droplets } from 'lucide-react';
 
-export type TabType = 'home' | 'learn' | 'watch' | 'explore' | 'game' | 'assessment';
+export type TabType = 'home' | 'learn' | 'watch' | 'explore' | 'game';
 
 interface HeaderProps {
   activeTab: TabType;
@@ -15,7 +15,6 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
     { id: 'watch', label: 'WATCH', icon: Tv, color: 'hover:text-red-500' },
     { id: 'explore', label: 'EXPLORE', icon: FlaskConical, color: 'hover:text-emerald-600' },
     { id: 'game', label: 'GAME', icon: Gamepad2, color: 'hover:text-amber-500' },
-    { id: 'assessment', label: 'Assessment', icon: Award, color: 'hover:text-purple-600' },
   ] as const;
 
   return (

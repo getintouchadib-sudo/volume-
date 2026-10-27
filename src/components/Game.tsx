@@ -9,12 +9,15 @@ import {
   Sparkles,
   HelpCircle,
   Shuffle,
-  Star
+  Lock,
+  Award,
+  Printer,
+  RotateCcw,
+  UserCheck
 } from 'lucide-react';
 
-type GameMode = 'match' | 'fill' | 'misconception';
+type GamePart = 'part-a' | 'part-b' | 'part-c';
 
-// Game A: Card Pair
 interface MatchCard {
   id: string;
   pairId: string;
@@ -23,7 +26,6 @@ interface MatchCard {
   type: 'L' | 'mL';
 }
 
-// Game B: Question
 interface FillQuestion {
   id: string;
   questionText: string;
@@ -33,7 +35,6 @@ interface FillQuestion {
   explanation: string;
 }
 
-// Game C: Misconception Statement
 interface MisconceptionItem {
   id: string;
   statement: string;
@@ -43,23 +44,40 @@ interface MisconceptionItem {
 }
 
 export const Game: React.FC = () => {
-  const [activeMode, setActiveMode] = useState<GameMode>('match');
-  const [score, setScore] = useState<number>(0);
-  const [streak, setStreak] = useState<number>(0);
+  const [activePart, setActivePart] = useState<GamePart>('part-a');
+  const [pupilName, setPupilName] = useState<string>('');
+  const [submittedName, setSubmittedName] = useState<string>('Year 5 Explorer');
+
+  // Progression & Score State
+  const [partAPassed, setPartAPassed] = useState<boolean>(false);
+  const [partBPassed, setPartBPassed] = useState<boolean>(false);
+  const [partCPassed, setPartCPassed] = useState<boolean>(false);
+
+  const [partAScore, setPartAScore] = useState<number | null>(null); // Percentage
+  const [partBScore, setPartBScore] = useState<number | null>(null); // Percentage
+  const [partCScore, setPartCScore] = useState<number | null>(null); // Percentage
+
+  const [partACorrectCount, setPartACorrectCount] = useState<number>(0);
+  const [partBCorrectCount, setPartBCorrectCount] = useState<number>(0);
+  const [partCCorrectCount, setPartCCorrectCount] = useState<number>(0);
+
+  const [partAFinished, setPartAFinished] = useState<boolean>(false);
+  const [partBFinished, setPartBFinished] = useState<boolean>(false);
+  const [partCFinished, setPartCFinished] = useState<boolean>(false);
 
   // Trigger celebration confetti
   const triggerConfetti = () => {
     confetti({
-      particleCount: 80,
-      spread: 70,
+      particleCount: 90,
+      spread: 80,
       origin: { y: 0.6 }
     });
   };
 
   // --------------------------------------------------------------------------
-  // GAME A: MATCH THE MEASUREMENT STATE & LOGIC
+  // PART A: MATCH THE MEASUREMENT LOGIC
   // --------------------------------------------------------------------------
-  const initialMatchPairs: { id: string; valA: string; valB: string; labelA: string; labelB: string }[] = [
+  const initialMatchPairs = [
     { id: 'm1', valA: '4 L', valB: '4,000 mL', labelA: '4 Litres', labelB: '4,000 Millilitres' },
     { id: 'm2', valA: '9 L', valB: '9,000 mL', labelA: '9 Litres', labelB: '9,000 Millilitres' },
     { id: 'm3', valA: '15 L', valB: '15,000 mL', labelA: '15 Litres', labelB: '15,000 Millilitres' },
@@ -80,8 +98,10 @@ export const Game: React.FC = () => {
   const [matchCards, setMatchCards] = useState<MatchCard[]>(generateShuffledCards);
   const [selectedMatchCards, setSelectedMatchCards] = useState<MatchCard[]>([]);
   const [matchedPairIds, setMatchedPairIds] = useState<string[]>([]);
+  const [matchMistakes, setMatchMistakes] = useState<number>(0);
 
   const handleMatchCardClick = (card: MatchCard) => {
+    if (partAFinished) return;
     if (matchedPairIds.includes(card.pairId)) return;
     if (selectedMatchCards.some((c) => c.id === card.id)) return;
 
@@ -93,27 +113,43 @@ export const Game: React.FC = () => {
 
       if (first.pairId === card.pairId) {
         // Correct match!
-        setMatchedPairIds((prev) => [...prev, card.pairId]);
-        setScore((s) => s + 20);
-        setStreak((st) => st + 1);
-        triggerConfetti();
-        setTimeout(() => setSelectedMatchCards([]), 600);
+        const newMatched = [...matchedPairIds, card.pairId];
+        setMatchedPairIds(newMatched);
+        setSelectedMatchCards([]);
+
+        if (newMatched.length === initialMatchPairs.length) {
+          // Finished Part A
+          const totalAttempts = initialMatchPairs.length + matchMistakes;
+          // Calculate score based on correct pairs out of total attempts, capped appropriately
+          const correct = initialMatchPairs.length;
+          const scorePct = Math.round((correct / totalAttempts) * 100);
+          setPartAScore(scorePct);
+          setPartACorrectCount(correct);
+          setPartAFinished(true);
+
+          if (scorePct >= 80) {
+            setPartAPassed(true);
+            triggerConfetti();
+          }
+        }
       } else {
         // Wrong match
-        setStreak(0);
-        setTimeout(() => setSelectedMatchCards([]), 1000);
+        setMatchMistakes((m) => m + 1);
+        setTimeout(() => setSelectedMatchCards([]), 800);
       }
     }
   };
 
-  const resetMatchGame = () => {
+  const resetPartA = () => {
     setMatchCards(generateShuffledCards());
     setSelectedMatchCards([]);
     setMatchedPairIds([]);
+    setMatchMistakes(0);
+    setPartAFinished(false);
   };
 
   // --------------------------------------------------------------------------
-  // GAME B: FILL IN THE MISSING VALUE STATE & LOGIC
+  // PART B: FILL IN THE MISSING VALUE LOGIC
   // --------------------------------------------------------------------------
   const fillQuestions: FillQuestion[] = [
     {
@@ -168,6 +204,7 @@ export const Game: React.FC = () => {
 
   const [currentFillIdx, setCurrentFillIdx] = useState<number>(0);
   const [fillSelectedOpt, setFillSelectedOpt] = useState<string | null>(null);
+  const [fillAnswers, setFillAnswers] = useState<Record<string, string>>({});
   const [fillSubmitted, setFillSubmitted] = useState<boolean>(false);
 
   const handleFillOptionSelect = (opt: string) => {
@@ -177,25 +214,47 @@ export const Game: React.FC = () => {
 
   const handleFillSubmit = () => {
     if (!fillSelectedOpt) return;
-    setFillSubmitted(true);
     const q = fillQuestions[currentFillIdx];
-    if (fillSelectedOpt === q.correctAnswer) {
-      setScore((s) => s + 15);
-      setStreak((st) => st + 1);
-      triggerConfetti();
-    } else {
-      setStreak(0);
+    const newAnswers = { ...fillAnswers, [q.id]: fillSelectedOpt };
+    setFillAnswers(newAnswers);
+    setFillSubmitted(true);
+
+    if (currentFillIdx === fillQuestions.length - 1) {
+      // Finished Part B
+      let correct = 0;
+      fillQuestions.forEach((fq) => {
+        if (newAnswers[fq.id] === fq.correctAnswer) {
+          correct += 1;
+        }
+      });
+      const scorePct = Math.round((correct / fillQuestions.length) * 100);
+      setPartBScore(scorePct);
+      setPartBCorrectCount(correct);
+      setPartBFinished(true);
+
+      if (scorePct >= 80) {
+        setPartBPassed(true);
+        triggerConfetti();
+      }
     }
   };
 
   const nextFillQuestion = () => {
     setFillSelectedOpt(null);
     setFillSubmitted(false);
-    setCurrentFillIdx((prev) => (prev + 1) % fillQuestions.length);
+    setCurrentFillIdx((prev) => prev + 1);
+  };
+
+  const resetPartB = () => {
+    setCurrentFillIdx(0);
+    setFillSelectedOpt(null);
+    setFillAnswers({});
+    setFillSubmitted(false);
+    setPartBFinished(false);
   };
 
   // --------------------------------------------------------------------------
-  // GAME C: BEAT THE MISCONCEPTION STATE & LOGIC
+  // PART C: BEAT THE MISCONCEPTION LOGIC
   // --------------------------------------------------------------------------
   const misconceptionItems: MisconceptionItem[] = [
     {
@@ -243,28 +302,61 @@ export const Game: React.FC = () => {
   ];
 
   const [currentMcIdx, setCurrentMcIdx] = useState<number>(0);
+  const [mcAnswers, setMcAnswers] = useState<Record<string, boolean>>({});
   const [mcUserChoice, setMcUserChoice] = useState<boolean | null>(null);
   const [mcSubmitted, setMcSubmitted] = useState<boolean>(false);
 
   const handleMcAnswer = (choice: boolean) => {
     if (mcSubmitted) return;
+    const item = misconceptionItems[currentMcIdx];
+    const newAnswers = { ...mcAnswers, [item.id]: choice };
+    setMcAnswers(newAnswers);
     setMcUserChoice(choice);
     setMcSubmitted(true);
 
-    const item = misconceptionItems[currentMcIdx];
-    if (choice === item.isCorrect) {
-      setScore((s) => s + 20);
-      setStreak((st) => st + 1);
-      triggerConfetti();
-    } else {
-      setStreak(0);
+    if (currentMcIdx === misconceptionItems.length - 1) {
+      // Finished Part C
+      let correct = 0;
+      misconceptionItems.forEach((m) => {
+        if (newAnswers[m.id] === m.isCorrect) {
+          correct += 1;
+        }
+      });
+      const scorePct = Math.round((correct / misconceptionItems.length) * 100);
+      setPartCScore(scorePct);
+      setPartCCorrectCount(correct);
+      setPartCFinished(true);
+
+      if (scorePct >= 80) {
+        setPartCPassed(true);
+        triggerConfetti();
+      }
     }
   };
 
   const nextMcQuestion = () => {
     setMcUserChoice(null);
     setMcSubmitted(false);
-    setCurrentMcIdx((prev) => (prev + 1) % misconceptionItems.length);
+    setCurrentMcIdx((prev) => prev + 1);
+  };
+
+  const resetPartC = () => {
+    setCurrentMcIdx(0);
+    setMcUserChoice(null);
+    setMcAnswers({});
+    setMcSubmitted(false);
+    setPartCFinished(false);
+  };
+
+  // Overall Score Calculations
+  const totalQuestionsAll = initialMatchPairs.length + fillQuestions.length + misconceptionItems.length;
+  const totalCorrectAll = partACorrectCount + partBCorrectCount + partCCorrectCount;
+  const overallPercentage = totalQuestionsAll > 0 ? Math.round((totalCorrectAll / totalQuestionsAll) * 100) : 0;
+
+  const allPartsPassed = partAPassed && partBPassed && partCPassed;
+
+  const handlePrintCertificate = () => {
+    window.print();
   };
 
   return (
@@ -274,104 +366,160 @@ export const Game: React.FC = () => {
         <div className="space-y-2 text-center md:text-left">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-xs font-bold uppercase tracking-wider">
             <Gamepad2 className="w-4 h-4 text-amber-200" />
-            Interactive Mathematics Games
+            3-Part Progressive Game Challenge
           </div>
           <h2 className="text-3xl md:text-4xl font-black">
             GAME: Liquid Measure Challenge
           </h2>
           <p className="text-amber-100 text-sm md:text-base max-w-xl">
-            Test your knowledge, beat common misconceptions, and earn high scores converting litres and millilitres!
+            Pass Part A (≥ 80%) to unlock Part B, and Part B (≥ 80%) to unlock Part C to earn your Official Certificate of Achievement!
           </p>
         </div>
 
-        {/* Score & Streak Counter Badge */}
-        <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20 flex items-center gap-6 shrink-0 text-center">
-          <div>
-            <span className="text-[10px] uppercase font-bold text-amber-200 block">Total Score</span>
-            <div className="text-3xl font-black text-amber-300 flex items-center justify-center gap-1">
-              <Trophy className="w-6 h-6 text-amber-300" />
-              <span>{score}</span>
-            </div>
-          </div>
-          <div className="border-l border-white/20 pl-6">
-            <span className="text-[10px] uppercase font-bold text-amber-200 block">Streak</span>
-            <div className="text-3xl font-black text-amber-300 flex items-center justify-center gap-1">
-              <Star className="w-6 h-6 text-amber-300 fill-amber-300" />
-              <span>{streak}</span>
-            </div>
-          </div>
+        <Mascot
+          message={
+            allPartsPassed
+              ? "Congratulations! You passed all three parts and earned your Certificate!"
+              : "Complete each part with at least 80% to unlock the next level!"
+          }
+          mood={allPartsPassed ? "cheering" : "happy"}
+          size="md"
+        />
+      </div>
+
+      {/* Pupil Name Banner for Certificate */}
+      <div className="bg-white p-6 rounded-3xl border-2 border-slate-100 shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="space-y-1 text-center sm:text-left">
+          <h3 className="font-extrabold text-slate-800 text-base flex items-center gap-2 justify-center sm:justify-start">
+            <UserCheck className="w-5 h-5 text-amber-600" />
+            Pupil Name for Certificate
+          </h3>
+          <p className="text-xs font-semibold text-slate-500">
+            Enter your name below so it appears on your Certificate of Achievement!
+          </p>
+        </div>
+
+        <div className="w-full sm:w-auto">
+          <input
+            type="text"
+            value={pupilName}
+            onChange={(e) => {
+              setPupilName(e.target.value);
+              setSubmittedName(e.target.value.trim() || 'Year 5 Explorer');
+            }}
+            placeholder="Enter your name..."
+            className="w-full sm:w-64 py-2.5 px-4 rounded-xl bg-slate-50 border-2 border-slate-200 text-slate-800 font-bold text-sm focus:outline-none focus:border-amber-500 focus:bg-white"
+          />
         </div>
       </div>
 
-      {/* Game Mode Selector Tabs */}
+      {/* Progressive Part Tabs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Part A Tab */}
         <button
-          onClick={() => setActiveMode('match')}
+          onClick={() => setActivePart('part-a')}
           className={`p-5 rounded-2xl border-2 font-black text-sm md:text-base transition-all text-left flex items-center justify-between ${
-            activeMode === 'match'
+            activePart === 'part-a'
               ? 'bg-amber-500 text-white border-amber-500 shadow-md scale-102'
               : 'bg-white text-slate-700 border-slate-200 hover:border-amber-300'
           }`}
         >
           <div>
-            <span className="block text-xs uppercase opacity-80 font-bold">Game A</span>
+            <div className="flex items-center gap-2">
+              <span className="block text-xs uppercase opacity-80 font-bold">Part A</span>
+              {partAPassed && (
+                <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black">
+                  Passed ({partAScore}%)
+                </span>
+              )}
+            </div>
             <span>Match the Measurement</span>
           </div>
           <Sparkles className="w-5 h-5" />
         </button>
 
+        {/* Part B Tab */}
         <button
-          onClick={() => setActiveMode('fill')}
+          disabled={!partAPassed}
+          onClick={() => setActivePart('part-b')}
           className={`p-5 rounded-2xl border-2 font-black text-sm md:text-base transition-all text-left flex items-center justify-between ${
-            activeMode === 'fill'
+            !partAPassed
+              ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-70'
+              : activePart === 'part-b'
               ? 'bg-orange-500 text-white border-orange-500 shadow-md scale-102'
               : 'bg-white text-slate-700 border-slate-200 hover:border-orange-300'
           }`}
         >
           <div>
-            <span className="block text-xs uppercase opacity-80 font-bold">Game B</span>
+            <div className="flex items-center gap-2">
+              <span className="block text-xs uppercase opacity-80 font-bold">Part B</span>
+              {!partAPassed ? (
+                <span className="flex items-center gap-1 text-[10px] font-bold text-slate-400">
+                  <Lock className="w-3 h-3" /> Locked
+                </span>
+              ) : partBPassed ? (
+                <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black">
+                  Passed ({partBScore}%)
+                </span>
+              ) : null}
+            </div>
             <span>Fill in the Missing Value</span>
           </div>
-          <HelpCircle className="w-5 h-5" />
+          {!partAPassed ? <Lock className="w-5 h-5 text-slate-400" /> : <HelpCircle className="w-5 h-5" />}
         </button>
 
+        {/* Part C Tab */}
         <button
-          onClick={() => setActiveMode('misconception')}
+          disabled={!partBPassed}
+          onClick={() => setActivePart('part-c')}
           className={`p-5 rounded-2xl border-2 font-black text-sm md:text-base transition-all text-left flex items-center justify-between ${
-            activeMode === 'misconception'
+            !partBPassed
+              ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-70'
+              : activePart === 'part-c'
               ? 'bg-red-500 text-white border-red-500 shadow-md scale-102'
               : 'bg-white text-slate-700 border-slate-200 hover:border-red-300'
           }`}
         >
           <div>
-            <span className="block text-xs uppercase opacity-80 font-bold">Game C</span>
+            <div className="flex items-center gap-2">
+              <span className="block text-xs uppercase opacity-80 font-bold">Part C</span>
+              {!partBPassed ? (
+                <span className="flex items-center gap-1 text-[10px] font-bold text-slate-400">
+                  <Lock className="w-3 h-3" /> Locked
+                </span>
+              ) : partCPassed ? (
+                <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black">
+                  Passed ({partCScore}%)
+                </span>
+              ) : null}
+            </div>
             <span>Beat the Misconception</span>
           </div>
-          <Trophy className="w-5 h-5" />
+          {!partBPassed ? <Lock className="w-5 h-5 text-slate-400" /> : <Trophy className="w-5 h-5" />}
         </button>
       </div>
 
       {/* -------------------------------------------------------------------- */}
-      {/* GAME A: MATCH THE MEASUREMENT */}
+      {/* PART A INTERFACE */}
       {/* -------------------------------------------------------------------- */}
-      {activeMode === 'match' && (
+      {activePart === 'part-a' && (
         <div className="bg-white rounded-3xl p-6 md:p-8 border-2 border-slate-100 shadow-lg space-y-6">
           <div className="flex items-center justify-between border-b border-slate-100 pb-4">
             <div>
               <h3 className="text-xl font-black text-slate-900">
-                Game A: Match Equivalent Measurements
+                Part A: Match Equivalent Measurements
               </h3>
               <p className="text-xs text-slate-500 font-semibold">
-                Click one Litre card and one Millilitre card to make a matching pair!
+                Click one Litre card and one Millilitre card to make a matching pair! (Passing score: ≥ 80%)
               </p>
             </div>
 
             <button
-              onClick={resetMatchGame}
+              onClick={resetPartA}
               className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-2 transition-colors"
             >
               <Shuffle className="w-4 h-4" />
-              <span>Shuffle / Reset</span>
+              <span>Restart Part A</span>
             </button>
           </div>
 
@@ -390,7 +538,7 @@ export const Game: React.FC = () => {
               return (
                 <button
                   key={card.id}
-                  disabled={isMatched}
+                  disabled={isMatched || partAFinished}
                   onClick={() => handleMatchCardClick(card)}
                   className={`p-5 rounded-2xl border-2 text-center transition-all flex flex-col items-center justify-center space-y-1 ${cardStyle}`}
                 >
@@ -404,225 +552,444 @@ export const Game: React.FC = () => {
             })}
           </div>
 
-          {matchedPairIds.length === initialMatchPairs.length && (
-            <div className="bg-emerald-50 border-2 border-emerald-200 p-6 rounded-2xl text-center space-y-3">
-              <Sparkles className="w-10 h-10 text-emerald-600 mx-auto" />
-              <h4 className="text-2xl font-black text-emerald-900">
-                Outstanding! All Pairs Matched!
-              </h4>
-              <p className="text-emerald-700 text-sm font-semibold">
-                You have earned +120 points!
-              </p>
-              <button
-                onClick={resetMatchGame}
-                className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors"
-              >
-                Play Again
-              </button>
+          {/* Part A Completion Card */}
+          {partAFinished && (
+            <div
+              className={`p-6 rounded-2xl border-2 text-center space-y-4 ${
+                partAPassed ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-rose-50 border-rose-200 text-rose-900'
+              }`}
+            >
+              {partAPassed ? (
+                <>
+                  <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
+                  <h4 className="text-2xl font-black">Part A Passed! Score: {partAScore}%</h4>
+                  <p className="text-sm font-medium">
+                    Awesome job! You have unlocked Part B — Fill in the Missing Value.
+                  </p>
+                  <button
+                    onClick={() => setActivePart('part-b')}
+                    className="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition-all"
+                  >
+                    Proceed to Part B →
+                  </button>
+                </>
+              ) : (
+                <>
+                  <XCircle className="w-12 h-12 text-rose-600 mx-auto" />
+                  <h4 className="text-2xl font-black">Score: {partAScore}% (Requires ≥ 80% to Pass)</h4>
+                  <p className="text-sm font-medium">
+                    You need at least 80% to unlock Part B. Try again to improve your score!
+                  </p>
+                  <button
+                    onClick={resetPartA}
+                    className="px-6 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md transition-all flex items-center gap-2 mx-auto"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    <span>Retry Part A</span>
+                  </button>
+                </>
+              )}
             </div>
           )}
         </div>
       )}
 
       {/* -------------------------------------------------------------------- */}
-      {/* GAME B: FILL IN THE MISSING VALUE */}
+      {/* PART B INTERFACE */}
       {/* -------------------------------------------------------------------- */}
-      {activeMode === 'fill' && (
+      {activePart === 'part-b' && (
         <div className="bg-white rounded-3xl p-6 md:p-8 border-2 border-slate-100 shadow-lg space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-            <div>
-              <h3 className="text-xl font-black text-slate-900">
-                Game B: Fill in the Missing Value
-              </h3>
-              <p className="text-xs text-slate-500 font-semibold">
-                Question {currentFillIdx + 1} of {fillQuestions.length}
-              </p>
+          {!partAPassed ? (
+            <div className="p-8 text-center space-y-4 bg-slate-50 rounded-2xl border-2 border-slate-200">
+              <Lock className="w-12 h-12 text-slate-400 mx-auto" />
+              <h3 className="text-xl font-bold text-slate-700">Part B is Locked!</h3>
+              <p className="text-sm text-slate-500 font-medium">Pass Part A with at least 80% score to unlock Part B.</p>
+              <button
+                onClick={() => setActivePart('part-a')}
+                className="px-6 py-2.5 rounded-xl bg-amber-500 text-white font-bold text-xs shadow-sm hover:bg-amber-600 transition-all"
+              >
+                Go to Part A
+              </button>
             </div>
-          </div>
-
-          {/* Question Card */}
-          <div className="bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-orange-200 p-8 rounded-2xl text-center space-y-6">
-            <span className="text-xs font-black tracking-widest uppercase bg-orange-200 text-orange-900 px-3 py-1 rounded-full">
-              Complete the Conversion
-            </span>
-
-            <div className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">
-              {fillQuestions[currentFillIdx].questionText}
-            </div>
-
-            {/* Options */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto pt-2">
-              {fillQuestions[currentFillIdx].options.map((opt, idx) => {
-                const isSelected = fillSelectedOpt === opt;
-                let btnStyle = 'bg-white border-slate-200 text-slate-800 hover:border-orange-400';
-                if (isSelected) {
-                  btnStyle = 'bg-orange-500 text-white font-black border-orange-500 shadow-md';
-                }
-                if (fillSubmitted && opt === fillQuestions[currentFillIdx].correctAnswer) {
-                  btnStyle = 'bg-emerald-600 text-white font-black border-emerald-600';
-                }
-
-                return (
-                  <button
-                    key={idx}
-                    disabled={fillSubmitted}
-                    onClick={() => handleFillOptionSelect(opt)}
-                    className={`p-4 rounded-xl border-2 text-base md:text-lg font-bold transition-all ${btnStyle}`}
-                  >
-                    {opt}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Action Buttons & Explanations */}
-            <div className="pt-4 flex flex-col items-center space-y-4">
-              {!fillSubmitted ? (
-                <button
-                  disabled={!fillSelectedOpt}
-                  onClick={handleFillSubmit}
-                  className="px-8 py-3 rounded-xl bg-orange-600 hover:bg-orange-700 disabled:opacity-40 text-white font-black text-sm shadow-md transition-all"
-                >
-                  Submit Answer
-                </button>
-              ) : (
-                <div className="space-y-4 max-w-xl mx-auto w-full">
-                  <div
-                    className={`p-4 rounded-2xl border-2 text-sm text-left space-y-2 ${
-                      fillSelectedOpt === fillQuestions[currentFillIdx].correctAnswer
-                        ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
-                        : 'bg-rose-50 border-rose-200 text-rose-900'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 font-black text-base">
-                      {fillSelectedOpt === fillQuestions[currentFillIdx].correctAnswer ? (
-                        <>
-                          <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                          <span>Correct! Great Conversion!</span>
-                        </>
-                      ) : (
-                        <>
-                          <XCircle className="w-5 h-5 text-rose-600" />
-                          <span>Incorrect choice.</span>
-                        </>
-                      )}
-                    </div>
-                    <p className="font-medium">
-                      {fillQuestions[currentFillIdx].explanation}
-                    </p>
-                  </div>
-
-                  <button
-                    onClick={nextFillQuestion}
-                    className="px-8 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-sm shadow-md transition-all"
-                  >
-                    Next Question →
-                  </button>
+          ) : (
+            <>
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div>
+                  <h3 className="text-xl font-black text-slate-900">
+                    Part B: Fill in the Missing Value
+                  </h3>
+                  <p className="text-xs text-slate-500 font-semibold">
+                    Question {Math.min(currentFillIdx + 1, fillQuestions.length)} of {fillQuestions.length} (Passing score: ≥ 80%)
+                  </p>
                 </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* -------------------------------------------------------------------- */}
-      {/* GAME C: BEAT THE MISCONCEPTION */}
-      {/* -------------------------------------------------------------------- */}
-      {activeMode === 'misconception' && (
-        <div className="bg-white rounded-3xl p-6 md:p-8 border-2 border-slate-100 shadow-lg space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-            <div>
-              <h3 className="text-xl font-black text-slate-900">
-                Game C: Beat the Misconception
-              </h3>
-              <p className="text-xs text-slate-500 font-semibold">
-                Statement {currentMcIdx + 1} of {misconceptionItems.length}
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-r from-red-50 to-rose-50 border-2 border-red-200 p-8 rounded-2xl text-center space-y-6">
-            <span className="text-xs font-black tracking-widest uppercase bg-red-200 text-red-900 px-3 py-1 rounded-full">
-              Is this Conversion Correct or False?
-            </span>
-
-            <div className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">
-              &ldquo;{misconceptionItems[currentMcIdx].statement}&rdquo;
-            </div>
-
-            {/* True / False Buttons */}
-            {!mcSubmitted ? (
-              <div className="flex justify-center gap-4 pt-2">
-                <button
-                  onClick={() => handleMcAnswer(true)}
-                  className="px-8 py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-lg shadow-lg flex items-center gap-2 transition-all transform hover:scale-105"
-                >
-                  <CheckCircle2 className="w-6 h-6" />
-                  <span>CORRECT</span>
-                </button>
 
                 <button
-                  onClick={() => handleMcAnswer(false)}
-                  className="px-8 py-4 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-lg shadow-lg flex items-center gap-2 transition-all transform hover:scale-105"
+                  onClick={resetPartB}
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-2 transition-colors"
                 >
-                  <XCircle className="w-6 h-6" />
-                  <span>FALSE / INCORRECT</span>
+                  <RotateCcw className="w-4 h-4" />
+                  <span>Restart Part B</span>
                 </button>
               </div>
-            ) : (
-              <div className="space-y-4 max-w-xl mx-auto text-left">
-                <div
-                  className={`p-5 rounded-2xl border-2 space-y-2 ${
-                    mcUserChoice === misconceptionItems[currentMcIdx].isCorrect
-                      ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
-                      : 'bg-rose-50 border-rose-200 text-rose-900'
-                  }`}
-                >
-                  <div className="flex items-center gap-2 font-black text-lg">
-                    {mcUserChoice === misconceptionItems[currentMcIdx].isCorrect ? (
-                      <>
-                        <CheckCircle2 className="w-6 h-6 text-emerald-600" />
-                        <span>You Spotted it Correctly!</span>
-                      </>
+
+              {!partBFinished ? (
+                <div className="bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-orange-200 p-8 rounded-2xl text-center space-y-6">
+                  <span className="text-xs font-black tracking-widest uppercase bg-orange-200 text-orange-900 px-3 py-1 rounded-full">
+                    Complete the Conversion
+                  </span>
+
+                  <div className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">
+                    {fillQuestions[currentFillIdx].questionText}
+                  </div>
+
+                  {/* Options */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto pt-2">
+                    {fillQuestions[currentFillIdx].options.map((opt, idx) => {
+                      const isSelected = fillSelectedOpt === opt;
+                      let btnStyle = 'bg-white border-slate-200 text-slate-800 hover:border-orange-400';
+                      if (isSelected) {
+                        btnStyle = 'bg-orange-500 text-white font-black border-orange-500 shadow-md';
+                      }
+                      if (fillSubmitted && opt === fillQuestions[currentFillIdx].correctAnswer) {
+                        btnStyle = 'bg-emerald-600 text-white font-black border-emerald-600';
+                      }
+
+                      return (
+                        <button
+                          key={idx}
+                          disabled={fillSubmitted}
+                          onClick={() => handleFillOptionSelect(opt)}
+                          className={`p-4 rounded-xl border-2 text-base md:text-lg font-bold transition-all ${btnStyle}`}
+                        >
+                          {opt}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="pt-4 flex flex-col items-center space-y-4">
+                    {!fillSubmitted ? (
+                      <button
+                        disabled={!fillSelectedOpt}
+                        onClick={handleFillSubmit}
+                        className="px-8 py-3 rounded-xl bg-orange-600 hover:bg-orange-700 disabled:opacity-40 text-white font-black text-sm shadow-md transition-all"
+                      >
+                        Submit Answer
+                      </button>
                     ) : (
-                      <>
-                        <XCircle className="w-6 h-6 text-rose-600" />
-                        <span>Not quite right!</span>
-                      </>
+                      <div className="space-y-4 max-w-xl mx-auto w-full">
+                        <div
+                          className={`p-4 rounded-2xl border-2 text-sm text-left space-y-2 ${
+                            fillSelectedOpt === fillQuestions[currentFillIdx].correctAnswer
+                              ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                              : 'bg-rose-50 border-rose-200 text-rose-900'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 font-black text-base">
+                            {fillSelectedOpt === fillQuestions[currentFillIdx].correctAnswer ? (
+                              <>
+                                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                                <span>Correct! Great Conversion!</span>
+                              </>
+                            ) : (
+                              <>
+                                <XCircle className="w-5 h-5 text-rose-600" />
+                                <span>Incorrect choice.</span>
+                              </>
+                            )}
+                          </div>
+                          <p className="font-medium">
+                            {fillQuestions[currentFillIdx].explanation}
+                          </p>
+                        </div>
+
+                        {currentFillIdx < fillQuestions.length - 1 && (
+                          <button
+                            onClick={nextFillQuestion}
+                            className="px-8 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-sm shadow-md transition-all"
+                          >
+                            Next Question →
+                          </button>
+                        )}
+                      </div>
                     )}
                   </div>
-
-                  <p className="font-bold text-base text-slate-900 pt-1">
-                    Correct Conversion: {misconceptionItems[currentMcIdx].correctionText}
-                  </p>
-
-                  <p className="text-sm font-medium leading-relaxed">
-                    {misconceptionItems[currentMcIdx].explanation}
-                  </p>
                 </div>
-
-                <div className="text-center pt-2">
-                  <button
-                    onClick={nextMcQuestion}
-                    className="px-8 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-sm shadow-md transition-all"
-                  >
-                    Next Statement →
-                  </button>
+              ) : (
+                /* Part B Completion Card */
+                <div
+                  className={`p-6 rounded-2xl border-2 text-center space-y-4 ${
+                    partBPassed ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-rose-50 border-rose-200 text-rose-900'
+                  }`}
+                >
+                  {partBPassed ? (
+                    <>
+                      <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
+                      <h4 className="text-2xl font-black">Part B Passed! Score: {partBScore}%</h4>
+                      <p className="text-sm font-medium">
+                        Great job! You have unlocked Part C — Beat the Misconception.
+                      </p>
+                      <button
+                        onClick={() => setActivePart('part-c')}
+                        className="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition-all"
+                      >
+                        Proceed to Part C →
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="w-12 h-12 text-rose-600 mx-auto" />
+                      <h4 className="text-2xl font-black">Score: {partBScore}% (Requires ≥ 80% to Pass)</h4>
+                      <p className="text-sm font-medium">
+                        You need at least 80% to unlock Part C. Try again to improve your score!
+                      </p>
+                      <button
+                        onClick={resetPartB}
+                        className="px-6 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md transition-all flex items-center gap-2 mx-auto"
+                      >
+                        <RotateCcw className="w-4 h-4" />
+                        <span>Retry Part B</span>
+                      </button>
+                    </>
+                  )}
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </>
+          )}
         </div>
       )}
 
-      {/* Mascot Encouragement */}
-      <div className="flex justify-center">
-        <Mascot
-          message="Awesome effort! Keep practicing to beat your high score and become a Liquid Measurement Master!"
-          mood="cheering"
-          size="md"
-        />
-      </div>
+      {/* -------------------------------------------------------------------- */}
+      {/* PART C INTERFACE */}
+      {/* -------------------------------------------------------------------- */}
+      {activePart === 'part-c' && (
+        <div className="bg-white rounded-3xl p-6 md:p-8 border-2 border-slate-100 shadow-lg space-y-6">
+          {!partBPassed ? (
+            <div className="p-8 text-center space-y-4 bg-slate-50 rounded-2xl border-2 border-slate-200">
+              <Lock className="w-12 h-12 text-slate-400 mx-auto" />
+              <h3 className="text-xl font-bold text-slate-700">Part C is Locked!</h3>
+              <p className="text-sm text-slate-500 font-medium">Pass Part B with at least 80% score to unlock Part C.</p>
+              <button
+                onClick={() => setActivePart('part-b')}
+                className="px-6 py-2.5 rounded-xl bg-orange-500 text-white font-bold text-xs shadow-sm hover:bg-orange-600 transition-all"
+              >
+                Go to Part B
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div>
+                  <h3 className="text-xl font-black text-slate-900">
+                    Part C: Beat the Misconception
+                  </h3>
+                  <p className="text-xs text-slate-500 font-semibold">
+                    Statement {Math.min(currentMcIdx + 1, misconceptionItems.length)} of {misconceptionItems.length} (Passing score: ≥ 80%)
+                  </p>
+                </div>
+
+                <button
+                  onClick={resetPartC}
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-2 transition-colors"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  <span>Restart Part C</span>
+                </button>
+              </div>
+
+              {!partCFinished ? (
+                <div className="bg-gradient-to-r from-red-50 to-rose-50 border-2 border-red-200 p-8 rounded-2xl text-center space-y-6">
+                  <span className="text-xs font-black tracking-widest uppercase bg-red-200 text-red-900 px-3 py-1 rounded-full">
+                    Is this Conversion Correct or False?
+                  </span>
+
+                  <div className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">
+                    &ldquo;{misconceptionItems[currentMcIdx].statement}&rdquo;
+                  </div>
+
+                  {!mcSubmitted ? (
+                    <div className="flex justify-center gap-4 pt-2">
+                      <button
+                        onClick={() => handleMcAnswer(true)}
+                        className="px-8 py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-lg shadow-lg flex items-center gap-2 transition-all transform hover:scale-105"
+                      >
+                        <CheckCircle2 className="w-6 h-6" />
+                        <span>CORRECT</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleMcAnswer(false)}
+                        className="px-8 py-4 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-lg shadow-lg flex items-center gap-2 transition-all transform hover:scale-105"
+                      >
+                        <XCircle className="w-6 h-6" />
+                        <span>FALSE / INCORRECT</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4 max-w-xl mx-auto text-left">
+                      <div
+                        className={`p-5 rounded-2xl border-2 space-y-2 ${
+                          mcUserChoice === misconceptionItems[currentMcIdx].isCorrect
+                            ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                            : 'bg-rose-50 border-rose-200 text-rose-900'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 font-black text-lg">
+                          {mcUserChoice === misconceptionItems[currentMcIdx].isCorrect ? (
+                            <>
+                              <CheckCircle2 className="w-6 h-6 text-emerald-600" />
+                              <span>You Spotted it Correctly!</span>
+                            </>
+                          ) : (
+                            <>
+                              <XCircle className="w-6 h-6 text-rose-600" />
+                              <span>Not quite right!</span>
+                            </>
+                          )}
+                        </div>
+
+                        <p className="font-bold text-base text-slate-900 pt-1">
+                          Correct Conversion: {misconceptionItems[currentMcIdx].correctionText}
+                        </p>
+
+                        <p className="text-sm font-medium leading-relaxed">
+                          {misconceptionItems[currentMcIdx].explanation}
+                        </p>
+                      </div>
+
+                      {currentMcIdx < misconceptionItems.length - 1 && (
+                        <div className="text-center pt-2">
+                          <button
+                            onClick={nextMcQuestion}
+                            className="px-8 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-sm shadow-md transition-all"
+                          >
+                            Next Statement →
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* Part C Completion Card */
+                <div
+                  className={`p-6 rounded-2xl border-2 text-center space-y-4 ${
+                    partCPassed ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-rose-50 border-rose-200 text-rose-900'
+                  }`}
+                >
+                  {partCPassed ? (
+                    <>
+                      <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
+                      <h4 className="text-2xl font-black">Part C Passed! Score: {partCScore}%</h4>
+                      <p className="text-sm font-medium">
+                        Fantastic achievement! You passed all three game parts and earned your Certificate!
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="w-12 h-12 text-rose-600 mx-auto" />
+                      <h4 className="text-2xl font-black">Score: {partCScore}% (Requires ≥ 80% to Pass)</h4>
+                      <p className="text-sm font-medium">
+                        You need at least 80% on Part C to earn the Certificate. Try again!
+                      </p>
+                      <button
+                        onClick={resetPartC}
+                        className="px-6 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md transition-all flex items-center gap-2 mx-auto"
+                      >
+                        <RotateCcw className="w-4 h-4" />
+                        <span>Retry Part C</span>
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
+      {/* -------------------------------------------------------------------- */}
+      {/* AWARD CERTIFICATE SECTION (SHOWN WHEN ALL 3 PARTS PASSED) */}
+      {/* -------------------------------------------------------------------- */}
+      {allPartsPassed && (
+        <div className="space-y-6 pt-6 border-t-2 border-slate-100">
+          <div
+            id="printable-certificate"
+            className="bg-gradient-to-b from-amber-50/80 via-white to-cyan-50/80 rounded-3xl p-8 md:p-12 border-8 border-amber-400 shadow-2xl text-center space-y-6 relative overflow-hidden"
+          >
+            {/* Decorative Seals */}
+            <div className="absolute top-4 left-4 w-12 h-12 rounded-full border-2 border-amber-400/60 flex items-center justify-center text-amber-500">
+              <Sparkles className="w-6 h-6" />
+            </div>
+            <div className="absolute top-4 right-4 w-12 h-12 rounded-full border-2 border-amber-400/60 flex items-center justify-center text-amber-500">
+              <Award className="w-6 h-6" />
+            </div>
+
+            <div className="space-y-2">
+              <span className="text-xs font-black uppercase tracking-widest text-amber-700 bg-amber-100 px-4 py-1 rounded-full">
+                Liquid Measure Lab • Mathematics Year 5 DSKP 5.3.1
+              </span>
+              <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight pt-2">
+                Certificate of Achievement
+              </h2>
+              <p className="text-slate-600 font-bold text-base">
+                Liquid Measure Lab — Game Challenge
+              </p>
+            </div>
+
+            <div className="py-4 border-y-2 border-amber-200 max-w-xl mx-auto space-y-1">
+              <span className="text-xs uppercase text-slate-400 font-bold tracking-wider">
+                PROUDLY PRESENTED TO
+              </span>
+              <p className="text-3xl md:text-4xl font-black text-cyan-800 underline decoration-amber-400 decoration-wavy">
+                {submittedName}
+              </p>
+            </div>
+
+            <p className="text-slate-700 text-sm md:text-base max-w-lg mx-auto font-medium leading-relaxed">
+              For successfully completing all three progressive levels of the <strong>Liquid Measure Lab — Game Challenge</strong> and demonstrating mastery in converting liquid volume units between litres and millilitres!
+            </p>
+
+            {/* Individual & Overall Score Summary */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto py-2">
+              <div className="bg-white border-2 border-amber-300 p-3 rounded-2xl shadow-xs">
+                <span className="text-[10px] font-bold uppercase text-slate-400 block">Part A Score</span>
+                <span className="text-xl font-black text-amber-600">{partAScore}%</span>
+              </div>
+              <div className="bg-white border-2 border-orange-300 p-3 rounded-2xl shadow-xs">
+                <span className="text-[10px] font-bold uppercase text-slate-400 block">Part B Score</span>
+                <span className="text-xl font-black text-orange-600">{partBScore}%</span>
+              </div>
+              <div className="bg-white border-2 border-red-300 p-3 rounded-2xl shadow-xs">
+                <span className="text-[10px] font-bold uppercase text-slate-400 block">Part C Score</span>
+                <span className="text-xl font-black text-red-600">{partCScore}%</span>
+              </div>
+              <div className="bg-white border-2 border-emerald-400 p-3 rounded-2xl shadow-xs">
+                <span className="text-[10px] font-bold uppercase text-slate-400 block">Overall Score</span>
+                <span className="text-xl font-black text-emerald-600">{overallPercentage}%</span>
+              </div>
+            </div>
+
+            <div className="text-xs text-slate-500 font-bold">
+              Total Correct: {totalCorrectAll} / {totalQuestionsAll} Questions Across All Three Parts
+            </div>
+
+            <div className="text-xs text-slate-400 font-bold pt-1">
+              Completion Date: {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </div>
+          </div>
+
+          <div className="flex justify-center gap-4">
+            <button
+              onClick={handlePrintCertificate}
+              className="px-8 py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-sm shadow-md transition-all flex items-center gap-2"
+            >
+              <Printer className="w-5 h-5" />
+              <span>Download / Print Certificate</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
